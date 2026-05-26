@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { client } from "@/lib/api";
 import { useBank } from "@/lib/bank-context";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ export function DataView({
   compact = false,
   onExpandToggle,
 }: DataViewProps) {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [viewMode, setViewMode] = useState<ViewMode>("constellation");
   const [compactMode, setCompactMode] = useState(compact);
@@ -84,9 +86,9 @@ export function DataView({
   // Which timestamp drives the constellation recency color
   type RecencyBasis = "mentioned_at" | "occurred_start" | "occurred_end";
   const RECENCY_BASIS_LABEL: Record<RecencyBasis, string> = {
-    mentioned_at: "mentioned",
-    occurred_start: "occurred (start)",
-    occurred_end: "occurred (end)",
+    mentioned_at: "dataView.colorBy.mentioned",
+    occurred_start: "dataView.colorBy.occurredStart",
+    occurred_end: "dataView.colorBy.occurredEnd",
   };
   const [recencyBasis, setRecencyBasis] = useState<RecencyBasis>("mentioned_at");
 
@@ -350,16 +352,18 @@ export function DataView({
       {loading && !data ? (
         <div className="text-center py-12">
           <RefreshCw className="w-8 h-8 mx-auto mb-3 text-muted-foreground animate-spin" />
-          <p className="text-muted-foreground">Loading memories...</p>
+          <p className="text-muted-foreground">{t("dataView.loadingMemories")}</p>
         </div>
       ) : data && data.total_units === 0 ? (
         <div className="text-center py-20">
           <FileText className="w-10 h-10 mx-auto mb-4 text-muted-foreground/50" />
-          <h3 className="text-base font-medium text-foreground mb-1">No memories</h3>
+          <h3 className="text-base font-medium text-foreground mb-1">
+            {t("dataView.empty.noMemories")}
+          </h3>
           {!documentId && !chunkId && (
             <>
               <p className="text-sm text-muted-foreground mb-6">
-                Add a document to start building this memory bank.
+                {t("dataView.empty.addDocumentDescription")}
               </p>
               <Button
                 variant="default"
@@ -371,7 +375,7 @@ export function DataView({
                 }}
               >
                 <Plus className="w-4 h-4" />
-                Add Document
+                {t("bankSelector.addDocument")}
               </Button>
             </>
           )}
@@ -399,7 +403,7 @@ export function DataView({
                         executeSearch();
                       }
                     }}
-                    placeholder="Filter by text or context (press Enter)..."
+                    placeholder={t("dataView.searchPlaceholder")}
                     className="pl-8 h-9"
                   />
                 </div>
@@ -411,7 +415,9 @@ export function DataView({
 
           {compactMode ? (
             <div className="flex items-center justify-between mb-2 px-1">
-              <div className="text-xs text-muted-foreground">{data.total_units} memories</div>
+              <div className="text-xs text-muted-foreground">
+                {t("dataView.count.memories", { count: data.total_units })}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -425,7 +431,7 @@ export function DataView({
                 className="h-6 px-2 text-xs gap-1"
               >
                 <Settings2 className="w-3 h-3" />
-                Expand
+                {t("common.actions.expand")}
               </Button>
             </div>
           ) : (
@@ -445,15 +451,18 @@ export function DataView({
                     className="h-7 px-2 text-xs gap-1"
                   >
                     <Eye className="w-3 h-3" />
-                    Compact
+                    {t("common.actions.compact")}
                   </Button>
                 )}
                 <div className="text-sm text-muted-foreground">
                   {searchQuery || tagFilters.length > 0 ? (
-                    `${filteredTableRows.length} matching memories`
+                    t("dataView.count.matching", { count: filteredTableRows.length })
                   ) : data.table_rows?.length < data.total_units ? (
                     <span>
-                      Showing {data.table_rows?.length ?? 0} of {data.total_units} total memories
+                      {t("dataView.count.showingTotal", {
+                        shown: data.table_rows?.length ?? 0,
+                        total: data.total_units,
+                      })}
                       <button
                         onClick={() => {
                           const newLimit = Math.min(data.total_units, fetchLimit + 1000);
@@ -466,11 +475,11 @@ export function DataView({
                         }}
                         className="ml-2 text-primary hover:underline"
                       >
-                        Load more
+                        {t("common.actions.loadMore")}
                       </button>
                     </span>
                   ) : (
-                    `${data.total_units} total memories`
+                    t("dataView.count.total", { count: data.total_units })
                   )}
                 </div>
 
@@ -484,19 +493,29 @@ export function DataView({
                     }`}
                     title={
                       consolidationStatus.pending_consolidation === 0
-                        ? `All memories consolidated${consolidationStatus.last_consolidated_at ? ` (last: ${new Date(consolidationStatus.last_consolidated_at).toLocaleString()})` : ""}`
-                        : `${consolidationStatus.pending_consolidation} memories pending consolidation`
+                        ? t("dataView.consolidation.allConsolidated", {
+                            last: consolidationStatus.last_consolidated_at
+                              ? new Date(consolidationStatus.last_consolidated_at).toLocaleString(
+                                  i18n.language
+                                )
+                              : "",
+                          })
+                        : t("dataView.consolidation.pendingTitle", {
+                            count: consolidationStatus.pending_consolidation,
+                          })
                     }
                   >
                     {consolidationStatus.pending_consolidation === 0 ? (
                       <>
                         <CheckCircle className="w-3 h-3" />
-                        In Sync
+                        {t("dataView.consolidation.inSync")}
                       </>
                     ) : (
                       <>
                         <Clock className="w-3 h-3" />
-                        {consolidationStatus.pending_consolidation} Pending
+                        {t("dataView.consolidation.pending", {
+                          count: consolidationStatus.pending_consolidation,
+                        })}
                         <button
                           onClick={() =>
                             loadData(
@@ -507,7 +526,7 @@ export function DataView({
                           }
                           disabled={loading}
                           className="ml-0.5 opacity-70 hover:opacity-100 disabled:opacity-40 transition-opacity"
-                          title="Refresh observations"
+                          title={t("dataView.consolidation.refreshObservations")}
                         >
                           <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
                         </button>
@@ -526,7 +545,7 @@ export function DataView({
                   }`}
                 >
                   <ScatterChart className="w-4 h-4" />
-                  Constellation
+                  {t("dataView.viewModes.constellation")}
                 </button>
                 <button
                   onClick={() => setViewMode("graph")}
@@ -537,7 +556,7 @@ export function DataView({
                   }`}
                 >
                   <Network className="w-4 h-4" />
-                  Graph
+                  {t("dataView.viewModes.graph")}
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
@@ -548,7 +567,7 @@ export function DataView({
                   }`}
                 >
                   <List className="w-4 h-4" />
-                  Table
+                  {t("dataView.viewModes.table")}
                 </button>
                 <button
                   onClick={() => setViewMode("timeline")}
@@ -559,7 +578,7 @@ export function DataView({
                   }`}
                 >
                   <Calendar className="w-4 h-4" />
-                  Timeline
+                  {t("dataView.viewModes.timeline")}
                 </button>
               </div>
             </div>
@@ -584,7 +603,11 @@ export function DataView({
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
                 className="flex-shrink-0 w-5 h-[700px] bg-transparent hover:bg-muted/50 flex items-center justify-center transition-colors"
-                title={showControlPanel ? "Hide panel" : "Show panel"}
+                title={
+                  showControlPanel
+                    ? t("dataView.controls.hidePanel")
+                    : t("dataView.controls.showPanel")
+                }
               >
                 {showControlPanel ? (
                   <ChevronRight className="w-3 h-3 text-muted-foreground/60" />
@@ -611,7 +634,9 @@ export function DataView({
                     <div className="p-4 space-y-5">
                       {/* Legend & Stats */}
                       <div>
-                        <h3 className="text-sm font-semibold mb-3 text-foreground">Graph</h3>
+                        <h3 className="text-sm font-semibold mb-3 text-foreground">
+                          {t("dataView.viewModes.graph")}
+                        </h3>
                         <div className="space-y-2">
                           {/* Nodes */}
                           <div className="flex items-center justify-between text-sm">
@@ -620,7 +645,7 @@ export function DataView({
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: "#0074d9" }}
                               />
-                              <span className="text-foreground">Nodes</span>
+                              <span className="text-foreground">{t("dataView.graph.nodes")}</span>
                             </div>
                             <span className="font-mono text-foreground">
                               {Math.min(
@@ -632,8 +657,10 @@ export function DataView({
                           </div>
 
                           <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
-                            Links ({linkStats.total}){" "}
-                            <span className="text-muted-foreground/60">· click to filter</span>
+                            {t("dataView.graph.links", { count: linkStats.total })}{" "}
+                            <span className="text-muted-foreground/60">
+                              {t("dataView.graph.clickToFilter")}
+                            </span>
                           </div>
                           <button
                             onClick={() => toggleLinkType("semantic")}
@@ -645,7 +672,9 @@ export function DataView({
                           >
                             <div className="flex items-center gap-2">
                               <div className="w-4 h-0.5 bg-[#0074d9]" />
-                              <span className="text-foreground">Semantic</span>
+                              <span className="text-foreground">
+                                {t("bankStats.linkTypeLabels.semantic")}
+                              </span>
                             </div>
                             <span
                               className={`font-mono ${linkStats.semantic === 0 ? "text-destructive" : "text-foreground"}`}
@@ -663,7 +692,9 @@ export function DataView({
                           >
                             <div className="flex items-center gap-2">
                               <div className="w-4 h-0.5 bg-[#009296]" />
-                              <span className="text-foreground">Temporal</span>
+                              <span className="text-foreground">
+                                {t("bankStats.linkTypeLabels.temporal")}
+                              </span>
                             </div>
                             <span
                               className={`font-mono ${linkStats.temporal === 0 ? "text-destructive" : "text-foreground"}`}
@@ -681,7 +712,9 @@ export function DataView({
                           >
                             <div className="flex items-center gap-2">
                               <div className="w-4 h-0.5 bg-[#f59e0b]" />
-                              <span className="text-foreground">Entity</span>
+                              <span className="text-foreground">
+                                {t("bankStats.linkTypeLabels.entity")}
+                              </span>
                             </div>
                             <span className="font-mono text-foreground">{linkStats.entity}</span>
                           </button>
@@ -695,7 +728,9 @@ export function DataView({
                           >
                             <div className="flex items-center gap-2">
                               <div className="w-4 h-0.5 bg-[#8b5cf6]" />
-                              <span className="text-foreground">Causal</span>
+                              <span className="text-foreground">
+                                {t("bankStats.linkTypeLabels.causal")}
+                              </span>
                             </div>
                             <span
                               className={`font-mono ${linkStats.causal === 0 ? "text-muted-foreground" : "text-foreground"}`}
@@ -718,11 +753,13 @@ export function DataView({
 
                       {/* Controls Section */}
                       <div>
-                        <h3 className="text-sm font-semibold mb-3 text-foreground">Display</h3>
+                        <h3 className="text-sm font-semibold mb-3 text-foreground">
+                          {t("dataView.controls.display")}
+                        </h3>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <Label htmlFor="show-labels" className="text-sm text-foreground">
-                              Show labels
+                              {t("dataView.controls.showLabels")}
                             </Label>
                             <Switch
                               id="show-labels"
@@ -737,15 +774,19 @@ export function DataView({
 
                       {/* Limits Section */}
                       <div>
-                        <h3 className="text-sm font-semibold mb-3 text-foreground">Performance</h3>
+                        <h3 className="text-sm font-semibold mb-3 text-foreground">
+                          {t("dataView.controls.performance")}
+                        </h3>
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center justify-between mb-2">
-                              <Label className="text-sm text-foreground">Max nodes</Label>
+                              <Label className="text-sm text-foreground">
+                                {t("dataView.controls.maxNodes")}
+                              </Label>
                               <span className="text-xs text-muted-foreground">
                                 {graph2DData.nodes.length > 50
                                   ? `${maxNodes ?? 50} / ${graph2DData.nodes.length}`
-                                  : `${maxNodes ?? "All"} / ${graph2DData.nodes.length}`}
+                                  : `${maxNodes ?? t("common.states.all")} / ${graph2DData.nodes.length}`}
                               </span>
                             </div>
                             <Slider
@@ -771,11 +812,12 @@ export function DataView({
                             />
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            All links between visible nodes are shown.
+                            {t("dataView.controls.allLinksShown")}
                             {graph2DData.nodes.length > 50 && (
                               <span className="block text-amber-600 dark:text-amber-400 mt-1">
-                                ⚠️ Limited to 50 nodes for performance. Total:{" "}
-                                {graph2DData.nodes.length}
+                                {t("dataView.controls.nodeLimitWarning", {
+                                  count: graph2DData.nodes.length,
+                                })}
                               </span>
                             )}
                           </p>
@@ -786,7 +828,7 @@ export function DataView({
 
                       {/* Hint */}
                       <div className="text-xs text-muted-foreground/60 text-center pt-2">
-                        Click a node to see details
+                        {t("dataView.controls.clickNodeHint")}
                       </div>
                     </div>
                   )}
@@ -806,10 +848,16 @@ export function DataView({
                   nodeColorFn={nodeColorFn}
                   linkColorFn={linkColorFn}
                   nodeSizeFn={factType === "observation" ? observationNodeSizeFn : undefined}
-                  sizeLegendLabel={factType === "observation" ? "source facts" : undefined}
+                  sizeLegendLabel={
+                    factType === "observation" ? t("memoryDetails.sourceFactsLabel") : undefined
+                  }
                   nodeHeatFn={recencyLookup ? recencyHeatFn : undefined}
                   heatLegendLabel={
-                    recencyLookup ? `recency · ${RECENCY_BASIS_LABEL[recencyBasis]}` : undefined
+                    recencyLookup
+                      ? t("dataView.constellation.recencyLegend", {
+                          basis: t(RECENCY_BASIS_LABEL[recencyBasis]),
+                        })
+                      : undefined
                   }
                   heatLegendEndpoints={
                     recencyLookup
@@ -828,7 +876,11 @@ export function DataView({
                   <button
                     onClick={() => setShowControlPanel(!showControlPanel)}
                     className="flex-shrink-0 w-5 h-[700px] bg-transparent hover:bg-muted/50 flex items-center justify-center transition-colors"
-                    title={showControlPanel ? "Hide panel" : "Show panel"}
+                    title={
+                      showControlPanel
+                        ? t("dataView.controls.hidePanel")
+                        : t("dataView.controls.showPanel")
+                    }
                   >
                     {showControlPanel ? (
                       <ChevronRight className="w-3 h-3 text-muted-foreground" />
@@ -850,15 +902,15 @@ export function DataView({
                       ) : (
                         <div className="p-4 space-y-4">
                           <h3 className="text-sm font-semibold text-foreground">
-                            Constellation View
+                            {t("dataView.constellation.title")}
                           </h3>
                           <p className="text-xs text-muted-foreground">
-                            Canvas-rendered memory map with spatial label deconfliction. Scroll to
-                            zoom, drag to pan, hover to explore entity connections. Click a memory
-                            to view details.
+                            {t("dataView.constellation.description")}
                           </p>
                           <div className="space-y-2 pt-2">
-                            <h4 className="text-xs font-medium text-muted-foreground">Color by</h4>
+                            <h4 className="text-xs font-medium text-muted-foreground">
+                              {t("dataView.colorBy.label")}
+                            </h4>
                             <Select
                               value={recencyBasis}
                               onValueChange={(v) => setRecencyBasis(v as RecencyBasis)}
@@ -867,15 +919,21 @@ export function DataView({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="mentioned_at">Mentioned</SelectItem>
-                                <SelectItem value="occurred_start">Occurred (start)</SelectItem>
-                                <SelectItem value="occurred_end">Occurred (end)</SelectItem>
+                                <SelectItem value="mentioned_at">
+                                  {t("dataView.colorBy.mentioned")}
+                                </SelectItem>
+                                <SelectItem value="occurred_start">
+                                  {t("dataView.colorBy.occurredStart")}
+                                </SelectItem>
+                                <SelectItem value="occurred_end">
+                                  {t("dataView.colorBy.occurredEnd")}
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-2 pt-2">
                             <h4 className="text-xs font-medium text-muted-foreground">
-                              Link types
+                              {t("bankStats.linkTypes")}
                             </h4>
                             {Object.entries({
                               semantic: "#0074d9",
@@ -898,18 +956,18 @@ export function DataView({
                                 <span
                                   className={`text-xs capitalize ${visibleLinkTypes.has(type) ? "text-foreground" : "text-muted-foreground line-through"}`}
                                 >
-                                  {type}
+                                  {t(`bankStats.linkTypeLabels.${type}`)}
                                 </span>
                               </div>
                             ))}
                           </div>
                           <div className="text-xs text-muted-foreground space-y-1 pt-2">
                             <div>
-                              Nodes:{" "}
+                              {t("dataView.graph.nodes")}:{" "}
                               <span className="text-foreground">{graph2DData.nodes.length}</span>
                             </div>
                             <div>
-                              Links:{" "}
+                              {t("dataView.graph.linksLabel")}:{" "}
                               <span className="text-foreground">{graph2DData.links.length}</span>
                             </div>
                           </div>
@@ -941,36 +999,42 @@ export function DataView({
                                 <TableHead
                                   className={factType === "observation" ? "w-[35%]" : "w-[38%]"}
                                 >
-                                  {factType === "observation" ? "Observation" : "Memory"}
+                                  {factType === "observation"
+                                    ? t("factTypes.observation")
+                                    : t("memoryDetails.memory")}
                                 </TableHead>
-                                <TableHead className="w-[15%]">Entities</TableHead>
-                                <TableHead className="w-[15%]">Tags</TableHead>
+                                <TableHead className="w-[15%]">
+                                  {t("navigation.entities")}
+                                </TableHead>
+                                <TableHead className="w-[15%]">{t("common.labels.tags")}</TableHead>
                                 {factType === "observation" && (
-                                  <TableHead className="w-[10%]">Sources</TableHead>
+                                  <TableHead className="w-[10%]">
+                                    {t("memoryDetails.sources")}
+                                  </TableHead>
                                 )}
                                 <TableHead
                                   className={factType === "observation" ? "w-[12%]" : "w-[16%]"}
                                 >
-                                  Occurred
+                                  {t("observationHistory.occurred")}
                                 </TableHead>
                                 <TableHead
                                   className={factType === "observation" ? "w-[13%]" : "w-[16%]"}
                                 >
-                                  Mentioned
+                                  {t("observationHistory.mentioned")}
                                 </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {paginatedRows.map((row: any, idx: number) => {
                                 const occurredDisplay = row.occurred_start
-                                  ? new Date(row.occurred_start).toLocaleDateString("en-US", {
+                                  ? new Date(row.occurred_start).toLocaleDateString(i18n.language, {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
                                     })
                                   : null;
                                 const mentionedDisplay = row.mentioned_at
-                                  ? new Date(row.mentioned_at).toLocaleDateString("en-US", {
+                                  ? new Date(row.mentioned_at).toLocaleDateString(i18n.language, {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
@@ -1065,8 +1129,11 @@ export function DataView({
                           {totalPages > 1 && (
                             <div className="flex items-center justify-between mt-3 pt-3 border-t">
                               <div className="text-xs text-muted-foreground">
-                                {startIndex + 1}-{Math.min(endIndex, filteredTableRows.length)} of{" "}
-                                {filteredTableRows.length}
+                                {t("entities.paginationRange", {
+                                  start: startIndex + 1,
+                                  end: Math.min(endIndex, filteredTableRows.length),
+                                  total: filteredTableRows.length,
+                                })}
                               </div>
                               <div className="flex items-center gap-1">
                                 <Button
@@ -1117,8 +1184,8 @@ export function DataView({
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
                       {data.table_rows?.length > 0
-                        ? "No memories match your filter"
-                        : "No memories found"}
+                        ? t("dataView.empty.filtered")
+                        : t("dataView.empty.notFound")}
                     </div>
                   )}
                 </div>
@@ -1139,7 +1206,7 @@ export function DataView({
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="text-4xl mb-2">📊</div>
-            <div className="text-sm text-muted-foreground">No data available</div>
+            <div className="text-sm text-muted-foreground">{t("dataView.empty.noData")}</div>
           </div>
         </div>
       )}
@@ -1164,6 +1231,7 @@ function TimelineView({
   bankId?: string;
   onMemoryClick: (id: string) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [granularity, setGranularity] = useState<Granularity>("month");
   const [currentIndex, setCurrentIndex] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -1214,13 +1282,13 @@ function TimelineView({
         case "year":
           return key;
         case "month":
-          return date.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+          return date.toLocaleDateString(i18n.language, { year: "numeric", month: "short" });
         case "week":
           const endOfWeek = new Date(date);
           endOfWeek.setDate(date.getDate() + 6);
-          return `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+          return `${date.toLocaleDateString(i18n.language, { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString(i18n.language, { month: "short", day: "numeric", year: "numeric" })}`;
         case "day":
-          return date.toLocaleDateString("en-US", {
+          return date.toLocaleDateString(i18n.language, {
             weekday: "short",
             month: "short",
             day: "numeric",
@@ -1291,12 +1359,14 @@ function TimelineView({
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Calendar className="w-12 h-12 text-muted-foreground mb-3" />
-        <div className="text-base font-medium text-foreground mb-1">No Timeline Data</div>
+        <div className="text-base font-medium text-foreground mb-1">
+          {t("dataView.timeline.emptyTitle")}
+        </div>
         <div className="text-xs text-muted-foreground text-center max-w-md">
-          No memories have occurred_at dates.
+          {t("dataView.timeline.emptyDescription")}
           {itemsWithoutDates.length > 0 && (
             <span className="block mt-1">
-              {itemsWithoutDates.length} memories without dates in Table View.
+              {t("dataView.timeline.withoutDates", { count: itemsWithoutDates.length })}
             </span>
           )}
         </div>
@@ -1306,8 +1376,11 @@ function TimelineView({
 
   const formatDateTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    const dateFormatted = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    const timeFormatted = date.toLocaleTimeString("en-US", {
+    const dateFormatted = date.toLocaleDateString(i18n.language, {
+      month: "short",
+      day: "numeric",
+    });
+    const timeFormatted = date.toLocaleTimeString(i18n.language, {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
@@ -1316,10 +1389,10 @@ function TimelineView({
   };
 
   const granularityLabels: Record<Granularity, string> = {
-    year: "Year",
-    month: "Month",
-    week: "Week",
-    day: "Day",
+    year: t("dataView.timeline.granularity.year"),
+    month: t("dataView.timeline.granularity.month"),
+    week: t("dataView.timeline.granularity.week"),
+    day: t("dataView.timeline.granularity.day"),
   };
 
   return (
@@ -1329,12 +1402,22 @@ function TimelineView({
         {/* Controls */}
         <div className="flex items-center justify-between mb-3 gap-4">
           <div className="text-xs text-muted-foreground">
-            {sortedItems.length} memories
-            {itemsWithoutDates.length > 0 && ` · ${itemsWithoutDates.length} without dates`}
+            {t("dataView.count.memories", { count: sortedItems.length })}
+            {itemsWithoutDates.length > 0 &&
+              ` · ${t("dataView.timeline.withoutDatesShort", { count: itemsWithoutDates.length })}`}
             {dateRange && (
               <span className="ml-2 text-foreground">
-                ({dateRange.first.toLocaleDateString("en-US", { month: "short", year: "numeric" })}{" "}
-                → {dateRange.last.toLocaleDateString("en-US", { month: "short", year: "numeric" })})
+                (
+                {dateRange.first.toLocaleDateString(i18n.language, {
+                  month: "short",
+                  year: "numeric",
+                })}{" "}
+                →{" "}
+                {dateRange.last.toLocaleDateString(i18n.language, {
+                  month: "short",
+                  year: "numeric",
+                })}
+                )
               </span>
             )}
           </div>
@@ -1348,7 +1431,7 @@ function TimelineView({
                 onClick={zoomOut}
                 disabled={granularity === "year"}
                 className="h-7 w-7 p-0"
-                title="Zoom out"
+                title={t("dataView.timeline.zoomOut")}
               >
                 <ZoomOut className="h-3 w-3" />
               </Button>
@@ -1361,7 +1444,7 @@ function TimelineView({
                 onClick={zoomIn}
                 disabled={granularity === "day"}
                 className="h-7 w-7 p-0"
-                title="Zoom in"
+                title={t("dataView.timeline.zoomIn")}
               >
                 <ZoomIn className="h-3 w-3" />
               </Button>
@@ -1375,7 +1458,7 @@ function TimelineView({
                 onClick={() => scrollToGroup(0)}
                 disabled={timelineGroups.length <= 1}
                 className="h-7 w-7 p-0"
-                title="First"
+                title={t("common.actions.first")}
               >
                 <ChevronsLeft className="h-3 w-3" />
               </Button>
@@ -1385,7 +1468,7 @@ function TimelineView({
                 onClick={() => scrollToGroup(currentIndex - 1)}
                 disabled={currentIndex === 0}
                 className="h-7 w-7 p-0"
-                title="Previous"
+                title={t("common.actions.previous")}
               >
                 <ChevronLeft className="h-3 w-3" />
               </Button>
@@ -1398,7 +1481,7 @@ function TimelineView({
                 onClick={() => scrollToGroup(currentIndex + 1)}
                 disabled={currentIndex >= timelineGroups.length - 1}
                 className="h-7 w-7 p-0"
-                title="Next"
+                title={t("common.actions.next")}
               >
                 <ChevronRight className="h-3 w-3" />
               </Button>
@@ -1408,7 +1491,7 @@ function TimelineView({
                 onClick={() => scrollToGroup(timelineGroups.length - 1)}
                 disabled={timelineGroups.length <= 1}
                 className="h-7 w-7 p-0"
-                title="Last"
+                title={t("common.actions.last")}
               >
                 <ChevronsRight className="h-3 w-3" />
               </Button>
@@ -1432,7 +1515,7 @@ function TimelineView({
                 </div>
                 <div className="w-2 h-2 rounded-full bg-primary z-10" />
                 <span className="ml-2 text-[10px] text-muted-foreground">
-                  {group.items.length} {group.items.length === 1 ? "item" : "items"}
+                  {t("dataView.timeline.items", { count: group.items.length })}
                 </span>
               </div>
 

@@ -1,5 +1,7 @@
 import en from "./en";
+import yueHant from "./yue-Hant";
 import zhCN from "./zh-CN";
+import zhTW from "./zh-TW";
 
 export const defaultLocale = "en";
 export const languageCookieName = "hindsight_cp_locale";
@@ -16,6 +18,16 @@ export const supportedLocales = [
     label: "Chinese (Simplified)",
     nativeLabel: "简体中文",
   },
+  {
+    code: "zh-TW",
+    label: "Chinese (Taiwan Traditional)",
+    nativeLabel: "正體中文（臺灣）",
+  },
+  {
+    code: "yue-Hant",
+    label: "Cantonese (Traditional)",
+    nativeLabel: "粵語（繁體）",
+  },
 ] as const;
 
 export type SupportedLocale = (typeof supportedLocales)[number]["code"];
@@ -27,12 +39,25 @@ export const resources = {
   "zh-CN": {
     translation: zhCN,
   },
+  "zh-TW": {
+    translation: zhTW,
+  },
+  "yue-Hant": {
+    translation: yueHant,
+  },
 } satisfies Record<SupportedLocale, { translation: typeof en }>;
 
 const localeAliases = {
   zh: "zh-CN",
   "zh-Hans": "zh-CN",
   "zh-SG": "zh-CN",
+  "zh-Hant": "zh-TW",
+  "zh-Hant-TW": "zh-TW",
+  yue: "yue-Hant",
+  "yue-Hant-HK": "yue-Hant",
+  "yue-HK": "yue-Hant",
+  "zh-HK": "yue-Hant",
+  "zh-Hant-HK": "yue-Hant",
 } satisfies Record<string, SupportedLocale>;
 
 function resolveLocaleAlias(value: string): SupportedLocale | undefined {

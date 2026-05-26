@@ -1,4 +1,7 @@
+"use client";
+
 import { Tag } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface TagListProps {
   tags: string[];
@@ -13,6 +16,8 @@ interface TagListProps {
  * Returns null when the tags array is empty or undefined.
  */
 export function TagList({ tags, size = "sm", showLabel = false }: TagListProps) {
+  const { t } = useTranslation();
+
   if (!tags || tags.length === 0) return null;
 
   const chipClass =
@@ -27,7 +32,7 @@ export function TagList({ tags, size = "sm", showLabel = false }: TagListProps) 
       {showLabel && (
         <div className="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-1">
           <Tag className="w-3 h-3" />
-          Tags
+          {t("common.labels.tags")}
         </div>
       )}
       <div className="flex flex-wrap gap-1.5">

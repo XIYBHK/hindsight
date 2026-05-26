@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 const ACCESS_KEY_COOKIE = "hindsight_cp_access";
 
@@ -7,14 +8,26 @@ export async function POST(request: NextRequest) {
 
   // If no access key is configured, return 503
   if (!accessKey) {
-    return NextResponse.json({ error: "Access key not configured" }, { status: 503 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Access key not configured",
+        errorKey: "api.errors.auth.accessKeyNotConfigured",
+      }),
+      { status: 503 }
+    );
   }
 
   let body: { key?: string };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Invalid request body",
+        errorKey: "api.errors.auth.invalidRequestBody",
+      }),
+      { status: 400 }
+    );
   }
 
   const providedKey = body.key;
@@ -23,7 +36,13 @@ export async function POST(request: NextRequest) {
   const isValid = providedKey && constantTimeCompare(providedKey, accessKey);
 
   if (!isValid) {
-    return NextResponse.json({ error: "Invalid access key" }, { status: 401 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Invalid access key",
+        errorKey: "api.errors.auth.invalidAccessKey",
+      }),
+      { status: 401 }
+    );
   }
 
   const response = NextResponse.json({ success: true });

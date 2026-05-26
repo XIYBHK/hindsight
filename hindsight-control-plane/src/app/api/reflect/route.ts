@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sdk, lowLevelClient } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,6 +52,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error reflecting:", error);
-    return NextResponse.json({ error: "Failed to reflect" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to reflect",
+        errorKey: "api.errors.reflect.failed",
+      }),
+      { status: 500 }
+    );
   }
 }

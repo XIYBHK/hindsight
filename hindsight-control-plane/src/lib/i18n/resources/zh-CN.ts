@@ -1,6 +1,6 @@
 import en from "./en";
 
-const zhCN: typeof en = {
+const baseZhCN = {
   common: {
     error: "错误",
     github: "GitHub",
@@ -84,7 +84,9 @@ const zhCN: typeof en = {
   },
   factTypes: {
     label: "事实类型：",
+    all: "全部",
     observation: "观察",
+    opinion: "观点",
     world: "世界",
     experience: "经历",
   },
@@ -298,5 +300,1244 @@ const zhCN: typeof en = {
     observationsEnableSuffix: "来启用。",
   },
 };
+
+const extraZhCN = {
+  common: {
+    actions: {
+      add: "添加",
+      adding: "正在添加...",
+      clear: "清除",
+      compact: "紧凑",
+      create: "创建",
+      creating: "正在创建...",
+      deselect: "取消选择",
+      deselectAll: "取消全选",
+      edit: "编辑",
+      expand: "展开",
+      first: "首页",
+      last: "末页",
+      learnMore: "了解更多",
+      loadMore: "加载更多",
+      next: "下一页",
+      open: "打开",
+      previous: "上一页",
+      refresh: "刷新",
+      retry: "重试",
+      saveChanges: "保存更改",
+      selectAll: "全选",
+      update: "更新",
+      updating: "正在更新...",
+      uploading: "正在上传...",
+      view: "查看",
+    },
+    labels: {
+      context: "上下文",
+      optional: "可选",
+    },
+    states: {
+      all: "全部",
+      current: "当前",
+      default: "默认",
+      disabled: "已禁用",
+      enabled: "已启用",
+      inactive: "未启用",
+      inherited: "继承",
+      new: "新增",
+      no: "否",
+      none: "无",
+      unchanged: "未变化",
+      unnamed: "未命名",
+      yes: "是",
+    },
+    warnings: {
+      cannotBeUndone: "此操作无法撤销。",
+    },
+  },
+  operationStatuses: {
+    pending: "待处理",
+    processing: "处理中",
+    completed: "已完成",
+    failed: "失败",
+    cancelled: "已取消",
+  },
+  bankSelector: {
+    logout: "退出登录",
+    viewOnGithub: "在 GitHub 查看",
+    theme: {
+      switchToDark: "切换到深色主题",
+      switchToLight: "切换到浅色主题",
+    },
+    createDialog: {
+      title: "创建新记忆库",
+      bankIdPlaceholder: "bank-id",
+      importFromTemplate: "从模板导入",
+      browseTemplates: "浏览模板",
+      templateDescription: "选择一个模板来预填新记忆库。",
+      errors: {
+        createBankFailed: "创建记忆库失败。",
+        importTemplateFailed: "导入模板失败。",
+        invalidTemplateJson: "模板必须是有效的 JSON。",
+      },
+    },
+    documentDialog: {
+      title: "添加新文档",
+      description: "将文档保留为当前记忆库中的记忆。",
+      source: "来源",
+      strategy: "策略",
+      strategyPlaceholder: "默认策略",
+      strategyDescription: "此文档可选的保留策略覆盖项。",
+      processAsync: "异步处理",
+      contentRequired: "文档内容必填。",
+      contentPlaceholder: "粘贴文档文本...",
+      optionalIdPlaceholder: "可选 ID",
+      optionalDocumentIdPlaceholder: "可选文档 ID",
+      optionalContextPlaceholder: "可选上下文",
+      documentContextPlaceholder: "文档上下文",
+      entitiesPlaceholder: "实体 JSON",
+      entitiesDescription: "可选的结构化实体元数据。",
+      metadataFormatExample: '{ "source": "notebook", "priority": "high" }',
+      metadataPlaceholder: "可选元数据 JSON",
+      tagsDescription: "逗号分隔的标签，用于过滤和观察范围。",
+      tagsPlaceholder: "项目, 决策, 跟进",
+      metadataFormatBefore: "元数据必须是有效的",
+      metadataFormatAfter: "JSON。",
+      editFileMetadata: "编辑文件元数据",
+      uploadingFiles: "正在上传文件...",
+      uploadFiles: "上传文件",
+      uploadFilesCount_one: "上传 {{count}} 个文件",
+      uploadFilesCount_other: "上传 {{count}} 个文件",
+      fileDropLabel: "将文件拖到此处，或点击选择",
+      fileUploadDisabledTitle: "文件上传 API 已禁用",
+      fileUploadDisabledDescription: "此服务器已禁用文件上传。",
+      fileUploadEnablePrefix: "设置",
+    },
+    observationScopes: {
+      allCombinations: "所有组合",
+      combined: "合并",
+      custom: "自定义",
+      customPlaceholder: "自定义观察范围 JSON",
+      moreScopes: "另外 {{count}} 个",
+      perTag: "按标签",
+      previewHint: "根据所选标签创建的观察范围预览。",
+      questionSingle: "为此标签创建观察范围？",
+      questionMultiple: "为这些标签创建观察范围？",
+    },
+  },
+  auditLogs: {
+    count_one: "{{count}} 条审计日志",
+    count_other: "{{count}} 条审计日志",
+    empty: "未找到审计日志",
+    chart: {
+      title: "请求量",
+      empty: "没有请求量数据",
+      total: "共 {{count}}",
+    },
+    actions: {
+      createBank: "创建记忆库",
+      updateBank: "更新记忆库",
+      clearMemories: "清除记忆",
+      batchRetain: "批量保留",
+      createMentalModel: "创建心智模型",
+      refreshMentalModel: "刷新心智模型",
+      deleteMentalModel: "删除心智模型",
+      createDirective: "创建指令",
+      deleteDirective: "删除指令",
+    },
+    columns: {
+      action: "操作",
+      duration: "耗时",
+      time: "时间",
+      transport: "传输",
+    },
+    dateRanges: {
+      allTime: "全部时间",
+      lastHour: "最近 1 小时",
+      last24Hours: "最近 24 小时",
+      last7Days: "最近 7 天",
+      last30Days: "最近 30 天",
+    },
+    periods: {
+      today: "今天",
+      last7Days: "最近 7 天",
+      last30Days: "最近 30 天",
+    },
+    filters: {
+      allActions: "所有操作",
+      allTransports: "所有传输",
+    },
+    transports: {
+      http: "HTTP",
+      mcp: "MCP",
+      system: "系统",
+    },
+    pagination: {
+      page: "第 {{current}} 页，共 {{total}} 页",
+    },
+    detail: {
+      title: "审计日志",
+      action: "操作",
+      duration: "耗时",
+      metadata: "元数据",
+      request: "请求",
+      response: "响应",
+      started: "开始时间",
+      transport: "传输",
+    },
+  },
+  operations: {
+    title: "后台操作",
+    count_one: "{{count}} 个操作",
+    count_other: "{{count}} 个操作",
+    actions: {
+      loadRaw: "加载原始载荷",
+      refresh: "刷新操作",
+    },
+    columns: {
+      completed: "完成时间",
+      created: "创建时间",
+      index: "序号",
+      items: "项目",
+      status: "状态",
+      totalItems: "项目总数",
+      type: "类型",
+      updated: "更新时间",
+    },
+    details: {
+      title: "操作详情",
+      noRawPayload: "没有可用的原始载荷",
+      parentRawPayload: "父级原始载荷",
+      rawPayload: "原始载荷",
+      rawPayloadDescription: "API 返回的原始操作载荷。",
+      subBatches: "子批次",
+    },
+    empty: {
+      all: "暂无操作",
+      filtered: "没有 {{status}} 的操作",
+    },
+    errors: {
+      loadDetails: "无法加载操作详情",
+    },
+    filters: {
+      allTypes: "所有类型",
+    },
+    pagination: {
+      showing: "显示第 {{start}}-{{end}} 项，共 {{total}} 项",
+    },
+    statusFilters: {
+      all: "所有状态",
+    },
+    types: {
+      retain: "保留",
+      consolidation: "整合",
+      mentalModelRefresh: "心智模型刷新",
+      fileConvertRetain: "文件转换保留",
+      webhookDelivery: "Webhook 投递",
+    },
+  },
+  bankConfig: {
+    actions: {
+      addStrategy: "添加策略",
+    },
+    disabled: {
+      title: "记忆库配置已禁用",
+      enablePrefix: "设置",
+      enableSuffix: "以启用单记忆库配置。",
+    },
+    dialogs: {
+      deleteStrategy: {
+        title: "删除 {{name}}？",
+        description: "此保留策略覆盖项将从记忆库配置中移除。",
+      },
+    },
+    errors: {
+      saveGemini: "无法保存 Gemini 设置",
+      saveMcp: "无法保存 MCP 设置",
+      saveObservations: "无法保存观察设置",
+      saveReflect: "无法保存反思设置",
+      saveRetain: "无法保存保留设置",
+    },
+    sections: {
+      retain: {
+        title: "保留",
+        description: "默认提取设置和命名策略。在保留请求中传入策略名，可对单项覆盖默认值。",
+      },
+      observations: {
+        title: "观察",
+        description: "控制如何将事实综合为持久观察。",
+      },
+      reflect: {
+        title: "反思",
+        description: "塑造记忆库在反思操作中的推理和回应方式。",
+      },
+      mcp: {
+        title: "MCP 工具",
+        description: "选择此记忆库通过 MCP 暴露哪些工具。",
+      },
+      models: {
+        title: "模型",
+        description: "配置特定模型提供商的行为。",
+      },
+    },
+    fields: {
+      chunkSize: {
+        label: "分块大小",
+        description: "保留提取时使用的最大文本分块大小。",
+      },
+      customExtractionPrompt: {
+        label: "自定义提取提示词",
+        description: "当提取模式设为 custom 时使用的提示词说明。",
+      },
+      defaultStrategy: {
+        label: "默认策略",
+        description: "当请求未指定策略时自动应用。",
+      },
+      enableObservations: {
+        label: "启用观察",
+        description: "启用将事实自动整合为观察。",
+      },
+      extractionMode: {
+        label: "提取模式",
+        description: "保留管线从文本中提取事实的强度。",
+      },
+      freeFormEntities: {
+        label: "自由形式实体",
+        description: "允许配置 schema 之外的实体标签。",
+      },
+      llmBatchSize: {
+        label: "LLM 批大小",
+        description:
+          "单次整合调用发送给 LLM 的事实数量。更大的值会减少 LLM 调用次数，但提示词更长。留空则使用服务器默认值。",
+      },
+      maxObservationsPerScope: {
+        label: "每个范围的最大观察数",
+        description:
+          "每个标签范围允许的最大观察数。达到限制后，只允许更新和删除。无标签观察不受此限制。-1 表示无限制。",
+      },
+      mission: {
+        label: "使命",
+      },
+      observationsMission: {
+        description: "此记忆库应综合成持久观察的内容。会替换内置整合规则；留空则使用服务器默认值。",
+      },
+      reflectMission: {
+        label: "使命",
+        description: "代理身份和目标。作为反思时的框架上下文使用。",
+      },
+      retainMission: {
+        description: "保留操作使用的提取使命。留空则使用服务器默认值。",
+      },
+      restrictTools: {
+        label: "限制工具",
+        description: "将此记忆库的 MCP 访问限制为所选工具。",
+      },
+      sourceFactsMaxTokens: {
+        label: "来源事实最大 Token 数",
+        description: "整合时随观察包含的来源事实总 token 预算。-1 表示无限制。",
+      },
+      sourceFactsMaxTokensPerObservation: {
+        label: "每条观察的来源事实最大 Token 数",
+        description:
+          "整合时每条观察可使用的来源事实 token 上限。每条观察最多包含这么多 token 的来源事实。-1 表示无限制。",
+      },
+    },
+    extractionModes: {
+      concise: "简洁",
+      verbose: "详细",
+      verbatim: "逐字",
+      chunks: "分块",
+      custom: "自定义",
+    },
+    placeholders: {
+      inheritedFromDefault: "继承默认值",
+      observationsMission:
+        "例如：观察是关于人物和项目的稳定事实。始终包含偏好、技能和反复出现的模式。忽略一次性事件和临时状态。",
+      reflectMission:
+        "例如：你是一名资深工程助手。回答必须基于已记录的决策和理由。忽略猜测。直接且精准。",
+      retainMission: "例如：提取稳定的用户偏好、项目事实和决策。忽略短暂的 UI 状态。",
+      serverDefault: "服务器默认值",
+      strategyName: "策略名称",
+    },
+    traits: {
+      skepticism: {
+        label: "怀疑度",
+        description: "评估主张时偏怀疑还是偏信任。",
+        low: "信任",
+        high: "怀疑",
+      },
+      literalism: {
+        label: "字面度",
+        description: "解读信息时的字面程度。",
+        low: "灵活",
+        high: "字面",
+      },
+      empathy: {
+        label: "共情度",
+        description: "考虑情绪和人际上下文的程度。",
+        low: "抽离",
+        high: "共情",
+      },
+    },
+    validation: {
+      nameRequired: "名称必填。",
+    },
+    mcp: {
+      enabledCount: "已启用 {{selected}} / {{total}}",
+      noneSelectedWarning: "此记忆库未选择任何 MCP 工具。",
+      groups: {
+        core: "核心",
+        bankManagement: "记忆库管理",
+        mentalModels: "心智模型",
+        directives: "指令",
+        memories: "记忆",
+        documents: "文档",
+        operations: "操作",
+        tags: "标签",
+      },
+    },
+    entityLabels: {
+      title: "实体标签",
+      description: "定义保留时提取的结构化实体标签。",
+      count_one: "{{count}} 个标签",
+      count_other: "{{count}} 个标签",
+      empty: "尚未配置实体标签。",
+      tag: "标签",
+      tagTitle: "将此标签用作 tag",
+      noFields: "还没有字段",
+      noValues: "还没有值",
+      examplePrefix: "示例：",
+      exampleAnyText: "任意文本",
+      exampleValue: "值",
+      actions: {
+        addField: "添加字段",
+        addLabel: "添加标签",
+        addValue: "添加值",
+      },
+      fieldTypes: {
+        text: "文本",
+        value: "单值",
+        multiValues: "多值",
+        map: "映射",
+      },
+      placeholders: {
+        fieldDescription: "字段描述",
+        fieldName: "field_name",
+        value: "value",
+        valueDescription: "值描述",
+      },
+    },
+    gemini: {
+      title: "Gemini",
+      custom: "自定义",
+      safetySettings: "安全设置",
+      safetyDescription: "覆盖此记忆库的 Gemini 安全设置。",
+      thresholdDescription: "为每个 Gemini 危害类别选择阻断阈值。",
+      harmCategories: {
+        harassment: "骚扰",
+        hateSpeech: "仇恨言论",
+        sexuallyExplicit: "露骨色情",
+        dangerousContent: "危险内容",
+      },
+      thresholds: {
+        unspecified: "未指定（使用 Gemini 默认值）",
+        off: "关闭（禁用过滤）",
+        blockNone: "不阻断",
+        blockLowAndAbove: "阻断低及以上",
+        blockMediumAndAbove: "阻断中及以上",
+        blockOnlyHigh: "仅阻断高",
+      },
+    },
+  },
+  bankProfile: {
+    loadingProfile: "正在加载档案...",
+    noBankDescription: "选择一个记忆库以查看档案。",
+    traitsDescription: "倾向特质会影响反思回应。",
+    traits: {
+      skepticism: {
+        label: "怀疑度",
+        description: "评估主张时偏怀疑还是偏信任。",
+        low: "信任",
+        high: "怀疑",
+      },
+      literalism: {
+        label: "字面度",
+        description: "解读信息时的字面程度。",
+        low: "灵活",
+        high: "字面",
+      },
+      empathy: {
+        label: "共情度",
+        description: "考虑情绪和人际上下文的程度。",
+        low: "抽离",
+        high: "共情",
+      },
+    },
+    disposition: {
+      title: "倾向",
+    },
+    mission: {
+      title: "使命",
+      description: "作为反思上下文使用的高层目标。",
+      empty: "尚未配置使命。",
+      placeholder: "描述此记忆库的用途...",
+    },
+    directives: {
+      title: "指令",
+      description: "注入到反思提示词中的硬性规则。",
+      empty: "还没有指令。",
+      detailTitle: "指令详情",
+      labels: {
+        nameRequired: "名称 *",
+        priority: "优先级",
+        rule: "规则",
+        ruleRequired: "规则 *",
+      },
+      placeholders: {
+        name: "指令名称",
+        rule: "始终...",
+      },
+    },
+    dialogs: {
+      clearObservations: {
+        stats: "这会删除 {{count}} 条观察。",
+      },
+      deleteBank: {
+        stats: "这会删除 {{memories}} 条记忆、{{documents}} 个文档和 {{links}} 条链接。",
+      },
+      deleteDirective: {
+        title: "删除指令",
+        confirm: "确定要删除此指令吗？",
+      },
+      directive: {
+        createTitle: "创建指令",
+        editTitle: "编辑指令",
+      },
+      disposition: {
+        title: "编辑倾向",
+      },
+      mission: {
+        title: "编辑使命",
+      },
+    },
+  },
+  bankStats: {
+    activity: "活动",
+    activityTitle: "最近活动",
+    consolidation: {
+      title: "整合",
+      done: "完成",
+      last: "最近",
+      viewFailedMemories: "查看失败记忆",
+    },
+    empty: {
+      noActivity: "暂无活动",
+      noLinks: "暂无链接",
+      noMemories: "暂无记忆",
+    },
+    failedConsolidations: {
+      title: "整合失败",
+      description: "观察整合期间失败的记忆。",
+      empty: "没有整合失败项",
+      failedCount_one: "{{count}} 条失败记忆",
+      failedCount_other: "{{count}} 条失败记忆",
+      recoverAll: "全部恢复",
+      recoverQueued: "已加入恢复队列",
+      columns: {
+        failedAt: "失败时间",
+      },
+    },
+    timeFields: {
+      ingested: {
+        short: "摄入",
+        long: "摄入时间",
+      },
+      mentioned: {
+        short: "提及",
+        long: "提及时间",
+      },
+      occurred: {
+        short: "发生",
+        long: "发生时间",
+      },
+    },
+    linkTypeLabels: {
+      causal: "因果",
+      entity: "实体",
+      semantic: "语义",
+      temporal: "时间",
+    },
+    periods: {
+      "1h": "1 小时",
+      "12h": "12 小时",
+      "1d": "1 天",
+      "7d": "7 天",
+      "30d": "30 天",
+      "90d": "90 天",
+    },
+    linkTypes: "链接类型",
+    links: "链接",
+    memories: "记忆",
+    memoryComposition: "记忆组成",
+    memoryStore: "记忆存储",
+    mentalModels: {
+      stale: "已过期",
+      upToDate: "最新",
+    },
+    never: "从未",
+    total: "总计",
+    totalWithCount: "共 {{count}}",
+    value: "数值",
+  },
+  dataView: {
+    loadingMemories: "正在加载记忆...",
+    searchPlaceholder: "搜索记忆...",
+    colorBy: {
+      label: "着色依据",
+      mentioned: "提及时间",
+      occurredEnd: "发生结束",
+      occurredStart: "发生开始",
+    },
+    consolidation: {
+      allConsolidated: "截至 {{last}} 全部已整合",
+      inSync: "已同步",
+      pending: "待整合",
+      pendingTitle: "整合待处理",
+      refreshObservations: "刷新观察",
+    },
+    constellation: {
+      title: "星座图",
+      description: "以交互式星座图探索相互链接的记忆。",
+      recencyLegend: "新近度 · {{basis}}",
+    },
+    controls: {
+      allLinksShown: "已显示所有链接",
+      clickNodeHint: "点击节点以过滤详情。",
+      display: "显示",
+      hidePanel: "隐藏面板",
+      maxNodes: "最大节点数",
+      nodeLimitWarning: "为保证性能，仅显示最强的 {{count}} 个节点。",
+      performance: "性能",
+      showLabels: "显示标签",
+      showPanel: "显示面板",
+    },
+    count: {
+      matching_one: "{{count}} 条匹配记忆",
+      matching_other: "{{count}} 条匹配记忆",
+      memories_one: "{{count}} 条记忆",
+      memories_other: "{{count}} 条记忆",
+      showingTotal: "显示 {{shown}} / {{total}}",
+      total_one: "共 {{count}} 条记忆",
+      total_other: "共 {{count}} 条记忆",
+    },
+    empty: {
+      addDocumentDescription: "添加文档以创建记忆。",
+      filtered: "没有记忆匹配当前过滤条件。",
+      noData: "没有可显示的数据。",
+      noMemories: "暂无记忆。",
+      notFound: "未找到匹配记忆。",
+    },
+    graph: {
+      clickToFilter: "点击节点以过滤",
+      links: "链接",
+      linksLabel: "链接",
+      nodes: "节点",
+    },
+    timeline: {
+      emptyDescription: "带日期的记忆会显示在这里。",
+      emptyTitle: "没有时间线数据",
+      granularity: {
+        day: "天",
+        week: "周",
+        month: "月",
+        year: "年",
+      },
+      items_one: "{{count}} 项",
+      items_other: "{{count}} 项",
+      withoutDates: "无日期",
+      withoutDatesShort: "无日期",
+      zoomIn: "放大",
+      zoomOut: "缩小",
+    },
+    viewModes: {
+      constellation: "星座图",
+      graph: "图谱",
+      table: "表格",
+      timeline: "时间线",
+    },
+  },
+  documents: {
+    loading: "正在加载文档...",
+    empty: "暂无文档",
+    count_one: "{{count}} 个文档",
+    count_other: "{{count}} 个文档",
+    searchPlaceholder: "搜索文档...",
+    loadPrompt: "选择文档以加载详情。",
+    actions: {
+      reprocess: "重新处理",
+      viewChunk: "查看分块",
+      viewDocument: "查看文档",
+    },
+    columns: {
+      documentId: "文档 ID",
+      eventDate: "事件日期",
+      memoryUnits: "记忆单元",
+      size: "大小",
+    },
+    chunks: {
+      empty: "此文档没有分块。",
+      loading: "正在加载分块...",
+      loadPrompt: "选择分块以查看详情。",
+      factTabs: {
+        observation: "观察",
+      },
+    },
+    delete: {
+      title: "删除文档",
+      confirm: "确定要删除此文档吗？",
+      alsoDelete: "同时删除",
+      memoryUnits: "记忆单元",
+      allMemoryUnits: "所有提取出的记忆单元",
+      extractedSuffix: "来自此文档。",
+      deletedTitle: "文档已删除",
+      deleted: "文档已删除。",
+      error: "无法删除文档。",
+    },
+    detail: {
+      document: "文档",
+      documentTitle: "文档详情",
+      documentDescription: "此文档的元数据和原始文本。",
+      loading: "正在加载文档详情...",
+      loadingDocument: "正在加载文档...",
+      storedContent: "已存储内容",
+      chunks: "分块",
+      chunk: "分块",
+      chunkTitle: "分块详情",
+      chunkDescription: "分块文本和提取出的记忆单元。",
+      chunkId: "分块 ID",
+      chunkIndex: "分块序号",
+      chunkText: "分块文本",
+      originalText: "原始文本",
+      characters: "{{count}} 个字符",
+      charactersShort: "{{count}} 字符",
+      textLength: "文本长度",
+      noChunkData: "没有可用的分块数据。",
+      noDocumentData: "没有可用的文档数据。",
+    },
+    editContent: {
+      warning: "编辑内容会替换已存储的文档文本。",
+    },
+    placeholders: {
+      tags: "标签，逗号分隔",
+      tagsShort: "标签",
+    },
+    reprocess: {
+      startedTitle: "已开始重新处理",
+      started: "文档重新处理已开始。",
+      error: "无法重新处理文档。",
+    },
+  },
+  memoryDetails: {
+    title: "记忆详情",
+    loading: "正在加载记忆...",
+    memory: "记忆",
+    memoryId: "记忆 ID",
+    sourceFactsLabel: "来源事实",
+    sourceMemories: "来源记忆",
+    sources: "来源",
+    history: "历史",
+    noHistory: "没有可用历史。",
+    observationScopes: "观察范围",
+    viewHistory: "查看历史",
+  },
+  mentalModels: {
+    searchPlaceholder: "按名称、查询或内容过滤心智模型...",
+    filteredCount: "{{filtered}} / {{total}} 个心智模型",
+    count_one: "{{count}} 个心智模型",
+    count_other: "{{count}} 个心智模型",
+    refreshedRelative: "{{time}}刷新",
+    actions: {
+      add: "添加心智模型",
+      generating: "正在生成...",
+      refreshManually: "手动刷新",
+    },
+    dialogs: {
+      create: {
+        title: "创建心智模型",
+        description: "通过运行查询创建心智模型。内容会自动生成，并可稍后刷新。",
+      },
+      delete: {
+        title: "删除心智模型",
+        confirm: "确定要删除",
+      },
+      update: {
+        title: "更新心智模型",
+        description: "更新心智模型配置。",
+      },
+    },
+    empty: {
+      filtered: "没有心智模型匹配当前过滤条件。",
+      noBank: "选择一个记忆库以查看心智模型。",
+      noContent: "尚未生成内容。",
+      none: "还没有心智模型。创建一个心智模型，从记忆中生成并保存摘要。",
+      select: "选择一个心智模型以查看详情。",
+      short: "没有心智模型",
+    },
+    includeChunksOptions: {
+      default: "默认",
+      yes: "是",
+      no: "否",
+    },
+    labels: {
+      excludeAllMentalModels: "排除所有心智模型",
+      excludeMentalModelIds: "排除心智模型 ID",
+      factTypes: "事实类型",
+      includeChunks: "包含分块",
+      maxTokens: "最大 token 数",
+      nameRequired: "名称 *",
+      recallChunksMaxTokens: "召回分块最大 token 数",
+      recallMaxTokens: "召回最大 token 数",
+      refreshMode: "刷新模式",
+      sourceQueryRequired: "来源查询 *",
+      tagGroups: "标签组",
+      tagGroupsJson: "标签组 JSON",
+      tagsMatch: "标签匹配",
+    },
+    pagination: {
+      range: "{{start}}-{{end}} / {{total}}",
+    },
+    placeholders: {
+      excludeMentalModelIds: "ID，逗号分隔",
+      id: "例如：team-communication",
+      name: "例如：团队沟通",
+      sourceQuery: "这个心智模型应该总结什么？",
+      tagGroupsJson: '[["project-a", "urgent"], ["project-b"]]',
+      tags: "标签，逗号分隔",
+    },
+    recall: {
+      description: "控制用于生成此心智模型的召回输入。",
+      leaveEmpty: "留空以使用默认值。",
+      maxTokensDescription: "召回事实的 token 预算。",
+      chunksMaxTokensDescription: "召回文档分块的 token 预算。",
+    },
+    refresh: {
+      auto: "自动刷新",
+      manual: "手动",
+      autoRefreshAfterConsolidation: "整合后自动刷新",
+      deltaDescription: "增量模式会根据上次刷新后的变化进行刷新。",
+      modes: {
+        full: "完整",
+        delta: "增量",
+      },
+    },
+    sections: {
+      otherMentalModels: "其他心智模型",
+      refresh: "刷新",
+    },
+    tabs: {
+      general: "常规",
+      options: "选项",
+    },
+    tags: {
+      descriptionBeforeStrong: "标签使用",
+      descriptionAfterStrong: "逻辑。严格匹配使用",
+      descriptionAfterCode: "。仅在需要高级分组时配置",
+      descriptionSuffix: "。",
+      operatorAnd: "和",
+    },
+    tagGroupsDescription: "标签组的 JSON 数组。",
+    tagsMatchDescription: "控制如何匹配所选标签。",
+    tagsMatchOptions: {
+      default: "默认",
+      any: "任意",
+      all: "全部",
+      anyStrict: "任意（严格）",
+      allStrict: "全部（严格）",
+    },
+    toasts: {
+      invalidTagGroupsJson: "标签组字段中的 JSON 无效",
+      refreshed: "心智模型已刷新",
+      refreshTimeout: "刷新超时",
+    },
+    viewModes: {
+      dashboard: "仪表盘",
+      list: "列表",
+    },
+  },
+  mentalModelDetails: {
+    title: "心智模型详情",
+    characters: "{{count}} 个字符",
+    storedContent: "已存储内容",
+    inSync: "已同步",
+    inSyncTitle: "心智模型已同步",
+    stale: "已过期",
+    staleTitle: "建议刷新",
+    noBasedOnData: "没有可用的来源记忆数据。",
+    noSourceData: "没有可用的来源数据。",
+    actions: {
+      reloadData: "重新加载数据",
+    },
+    configuration: {
+      created: "创建时间",
+      excludedIds: "排除的 ID",
+      identity: "身份",
+      lastRefreshed: "上次刷新",
+      maxTokens: "最大 token 数",
+      recallParameters: "召回参数",
+      refreshMode: "刷新模式",
+      refreshTrigger: "刷新触发器",
+      sourceQuery: "来源查询",
+      timing: "时间",
+    },
+    diff: {
+      after: "之后",
+      basedOn: "基于",
+      before: "之前",
+      content: "内容",
+      kept: "保留",
+    },
+    history: {
+      changed: "已更改",
+      empty: "还没有刷新历史。",
+      notCaptured: "未捕获之前的内容。",
+      previousContentUnavailable: "之前的内容不可用。",
+    },
+    tabs: {
+      configuration: "配置",
+      content: "内容",
+      history: "历史",
+    },
+    toasts: {
+      refreshTimeoutDescription: "刷新请求未能在超时时间内完成。",
+    },
+  },
+  observationHistory: {
+    changePosition: "第 {{index}} / {{total}} 次更改",
+    dates: "日期",
+    memoryUnavailable: "记忆不可用",
+    mentioned: "提及",
+    mentionedAt: "提及时间",
+    occurred: "发生",
+    occurredEnd: "发生结束",
+    occurredStart: "发生开始",
+    sourceFacts: "来源事实",
+  },
+  constellation: {
+    fullscreen: {
+      enter: "全屏",
+      enterLabel: "进入全屏星座图",
+      exit: "退出全屏",
+      exitLabel: "退出全屏星座图",
+    },
+    hud: "{{shown}} / {{total}} 个节点",
+    instructions: "拖动可旋转，滚动可缩放，点击节点可查看关联记忆。",
+    legend: {
+      few: "少",
+      links: "链接",
+      many: "多",
+    },
+    linkTypes: {
+      causal: "因果",
+      entity: "实体",
+      semantic: "语义",
+      temporal: "时间",
+    },
+    tooltip: {
+      evidence: "证据",
+      links: "链接",
+      sources: "来源",
+    },
+  },
+  graph: {
+    loading: "正在加载图谱...",
+    empty: "没有可显示的记忆。",
+    controlsHint: "拖动节点可重新排列，滚动可缩放。",
+    linkTypes: {
+      caused_by: "由...导致",
+      causal: "因果",
+      causes: "导致",
+      enables: "促成",
+      entity: "实体",
+      prevents: "阻止",
+      semantic: "语义",
+      temporal: "时间",
+    },
+    tooltip: {
+      causalLink: "因果链接",
+      entity: "实体",
+      linkType: "链接类型",
+      weight: "权重",
+    },
+  },
+  tagFilter: {
+    all: "全部",
+    any: "任意",
+    clear: "清除",
+    matchAllTitle: "匹配所有选中标签",
+    matchAnyTitle: "匹配任意选中标签",
+    placeholder: "按标签过滤...",
+    removeTag: "移除 {{tag}}",
+  },
+  recall: {
+    observations: {
+      label: "观察",
+      proofCount: "{{count}} 条证据",
+      relevance: "相关度 {{score}}",
+    },
+    traceActions: {
+      showLess: "收起",
+      viewAllResults: "查看全部 {{count}} 个结果",
+    },
+    traceDescriptions: {
+      finalResults: "检索和评分后的最终输出。",
+      rrf: "使用倒数排名融合合并并行检索通道。",
+    },
+    traceLabels: {
+      anyDate: "任意日期",
+      combinedScoring: "综合评分",
+      merge: "合并",
+      methodResultCount: "{{method}} · {{count}}",
+      methods: "{{count}} 个方法",
+      output: "输出",
+      rerank: "重排",
+      recencyShort: "新：",
+      rrfScore: "RRF {{score}}",
+      temporalShort: "时：",
+    },
+    traceMethods: {
+      semantic: "语义",
+      temporal: "时间",
+      entity: "实体",
+      text: "文本",
+      hybrid: "混合",
+      keyword: "关键词",
+      vector: "向量",
+    },
+    traceTooltips: {
+      crossEncoder: "重排序后的交叉编码器分数。",
+      temporal: "基于查询日期的时间接近度加成。",
+      recency: "基于较新记忆的新近度加成。",
+    },
+  },
+  api: {
+    errors: {
+      auth: {
+        accessKeyNotConfigured: "未配置访问密钥",
+        invalidRequestBody: "请求体无效",
+        invalidAccessKey: "访问密钥无效",
+        unauthorized: "未授权",
+      },
+      validation: {
+        bankIdRequired: "bank_id 为必填项",
+        bankAndDirectiveIdRequired: "bank_id 和 directive_id 为必填项",
+        bankAndMentalModelIdRequired: "bank_id 和 mental_model_id 为必填项",
+        bankAndModelIdRequired: "bank_id 和 model_id 为必填项",
+        operationIdRequired: "operation_id 为必填项",
+        missingRequestData: "缺少请求数据",
+        missingBankId: "缺少 bank_id",
+      },
+      generic: {
+        failed: "失败",
+        unsupportedIndividualMemoryDelete: "暂不支持删除单条记忆单元。请改用清除全部记忆。",
+      },
+      banks: {
+        fetch: "获取记忆库失败",
+        fetchFromApi: "从 API 获取记忆库失败",
+        create: "创建记忆库失败",
+        update: "更新记忆库失败",
+        delete: "删除记忆库失败",
+        exportTemplate: "导出记忆库模板失败",
+        importTemplate: "导入记忆库模板失败",
+      },
+      bankConfig: {
+        fetch: "获取记忆库配置失败",
+        update: "更新记忆库配置失败",
+        reset: "重置记忆库配置失败",
+      },
+      bankProfile: {
+        fetch: "获取记忆库档案失败",
+        update: "更新记忆库档案失败",
+      },
+      memories: {
+        list: "列出记忆单元失败",
+        fetch: "获取记忆失败",
+        notFound: "未找到记忆",
+        retain: "批量保留失败",
+        retainAsync: "异步批量保留失败",
+        history: "获取观察历史失败",
+      },
+      documents: {
+        fetchList: "获取文档列表失败",
+        fetch: "获取文档失败",
+        updateTags: "更新文档标签失败",
+        delete: "删除文档失败",
+        chunks: "获取文档分块失败",
+        reprocess: "重新处理文档失败",
+      },
+      files: {
+        upload: "上传文件失败",
+      },
+      chunks: {
+        fetch: "获取分块失败",
+      },
+      entities: {
+        list: "列出实体失败",
+        fetch: "获取实体失败",
+        graph: "获取实体图失败",
+        regenerateObservations: "重新生成实体观察失败",
+      },
+      graph: {
+        fetch: "获取图数据失败",
+      },
+      mentalModels: {
+        list: "列出心智模型失败",
+        fetch: "获取心智模型失败",
+        create: "创建心智模型失败",
+        update: "更新心智模型失败",
+        delete: "删除心智模型失败",
+        refresh: "刷新心智模型失败",
+        history: "获取心智模型历史失败",
+        notFound: "未找到心智模型",
+      },
+      observations: {
+        list: "列出观察失败",
+        clear: "清除观察失败",
+        fetch: "获取观察失败",
+      },
+      directives: {
+        list: "列出指令失败",
+        fetch: "获取指令失败",
+        create: "创建指令失败",
+        update: "更新指令失败",
+        delete: "删除指令失败",
+      },
+      operations: {
+        fetch: "获取操作失败",
+        cancel: "取消操作失败",
+        status: "获取操作状态失败",
+        retry: "重试操作失败",
+      },
+      auditLogs: {
+        list: "列出审计日志失败",
+        stats: "获取审计日志统计失败",
+      },
+      tags: {
+        list: "列出标签失败",
+      },
+      consolidation: {
+        trigger: "触发整合失败",
+        recover: "恢复整合失败",
+      },
+      recall: {
+        failed: "召回失败",
+      },
+      reflect: {
+        failed: "反思失败",
+      },
+      stats: {
+        fetch: "获取统计数据失败",
+        memoriesTimeseries: "获取记忆时间序列失败",
+      },
+      version: {
+        fetch: "获取版本失败",
+      },
+      webhooks: {
+        list: "列出 Webhook 失败",
+        create: "创建 Webhook 失败",
+        update: "更新 Webhook 失败",
+        delete: "删除 Webhook 失败",
+        deliveries: "获取 Webhook 投递失败",
+      },
+    },
+  },
+  webhooks: {
+    allEvents: "所有事件",
+    count_one: "{{count}} 个 webhook",
+    count_other: "{{count}} 个 webhook",
+    empty: "尚未配置 webhook。",
+    actions: {
+      add: "添加 Webhook",
+      create: "创建 Webhook",
+      delete: "删除 Webhook",
+      edit: "编辑 Webhook",
+      refresh: "刷新 Webhook",
+      hideSecret: "隐藏密钥",
+      removePair: "移除键值对",
+      showSecret: "显示密钥",
+      viewDeliveries: "查看投递",
+    },
+    columns: {
+      createdAt: "创建时间",
+      eventTypes: "事件类型",
+      httpStatus: "HTTP 状态",
+      method: "方法",
+      url: "URL",
+    },
+    deliveries: {
+      title: "Webhook 投递",
+      titleShort: "投递",
+      attempts: "尝试次数",
+      empty: "还没有投递记录。",
+      event: "事件",
+      responseBody: "响应体",
+    },
+    deliveryStatuses: {
+      delivered: "已投递",
+    },
+    dialogs: {
+      create: {
+        title: "创建 Webhook",
+        description: "将记忆库事件发送到外部端点。",
+      },
+      delete: {
+        title: "删除 Webhook",
+        description: "此 webhook 将停止接收事件。",
+      },
+      edit: {
+        title: "编辑 Webhook",
+        description: "更新端点、事件、请求头和投递设置。",
+      },
+    },
+    labels: {
+      clearExistingSecret: "清除现有密钥",
+      customHeaders: "自定义请求头",
+      queryParameters: "查询参数",
+      secret: "密钥",
+      timeout: "超时",
+      type: "类型",
+      url: "URL",
+    },
+    placeholders: {
+      keepExistingSecret: "留空以保留现有密钥",
+      key: "键",
+      signingSecret: "签名密钥",
+      value: "值",
+    },
+  },
+};
+
+type LocaleBranch = Record<string, unknown>;
+
+function mergeLocale<T extends LocaleBranch, U extends LocaleBranch>(base: T, extra: U): T & U {
+  const merged: LocaleBranch = { ...base };
+
+  for (const [key, value] of Object.entries(extra)) {
+    const baseValue = merged[key];
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      baseValue &&
+      typeof baseValue === "object" &&
+      !Array.isArray(baseValue)
+    ) {
+      merged[key] = mergeLocale(baseValue as LocaleBranch, value as LocaleBranch);
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  return merged as T & U;
+}
+
+const zhCN: typeof en = mergeLocale(baseZhCN, extraZhCN);
 
 export default zhCN;

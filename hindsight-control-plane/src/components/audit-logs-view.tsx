@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useBank } from "@/lib/bank-context";
 import { client, AuditLogEntry, AuditStatsBucket } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -25,37 +26,56 @@ import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const ACTION_OPTIONS = [
-  { value: "all", label: "All actions" },
-  { value: "retain", label: "Retain" },
-  { value: "recall", label: "Recall" },
-  { value: "reflect", label: "Reflect" },
-  { value: "create_bank", label: "Create Bank" },
-  { value: "update_bank", label: "Update Bank" },
-  { value: "delete_bank", label: "Delete Bank" },
-  { value: "clear_memories", label: "Clear Memories" },
-  { value: "consolidation", label: "Consolidation" },
-  { value: "batch_retain", label: "Batch Retain" },
-  { value: "create_mental_model", label: "Create Mental Model" },
-  { value: "refresh_mental_model", label: "Refresh Mental Model" },
-  { value: "delete_mental_model", label: "Delete Mental Model" },
-  { value: "create_directive", label: "Create Directive" },
-  { value: "delete_directive", label: "Delete Directive" },
-  { value: "file_convert_retain", label: "File Convert & Retain" },
-  { value: "webhook_delivery", label: "Webhook Delivery" },
+  { value: "all", labelKey: "auditLogs.filters.allActions" },
+  { value: "retain", labelKey: "operations.types.retain" },
+  { value: "recall", labelKey: "navigation.recall" },
+  { value: "reflect", labelKey: "navigation.reflect" },
+  { value: "create_bank", labelKey: "auditLogs.actions.createBank" },
+  { value: "update_bank", labelKey: "auditLogs.actions.updateBank" },
+  { value: "delete_bank", labelKey: "bankActions.deleteBank" },
+  { value: "clear_memories", labelKey: "auditLogs.actions.clearMemories" },
+  { value: "consolidation", labelKey: "operations.types.consolidation" },
+  { value: "batch_retain", labelKey: "auditLogs.actions.batchRetain" },
+  { value: "create_mental_model", labelKey: "auditLogs.actions.createMentalModel" },
+  { value: "refresh_mental_model", labelKey: "auditLogs.actions.refreshMentalModel" },
+  { value: "delete_mental_model", labelKey: "auditLogs.actions.deleteMentalModel" },
+  { value: "create_directive", labelKey: "auditLogs.actions.createDirective" },
+  { value: "delete_directive", labelKey: "auditLogs.actions.deleteDirective" },
+  { value: "file_convert_retain", labelKey: "operations.types.fileConvertRetain" },
+  { value: "webhook_delivery", labelKey: "operations.types.webhookDelivery" },
 ];
 
 const TRANSPORT_OPTIONS = [
-  { value: "all", label: "All transports" },
-  { value: "http", label: "HTTP" },
-  { value: "mcp", label: "MCP" },
-  { value: "system", label: "System" },
+  { value: "all", labelKey: "auditLogs.filters.allTransports" },
+  { value: "http", labelKey: "auditLogs.transports.http" },
+  { value: "mcp", labelKey: "auditLogs.transports.mcp" },
+  { value: "system", labelKey: "auditLogs.transports.system" },
 ];
 
 const PERIOD_OPTIONS = [
-  { value: "1d", label: "Today" },
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
+  { value: "1d", labelKey: "auditLogs.periods.today" },
+  { value: "7d", labelKey: "auditLogs.periods.last7Days" },
+  { value: "30d", labelKey: "auditLogs.periods.last30Days" },
 ];
+
+const ACTION_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  ACTION_OPTIONS.filter((option) => option.value !== "all").map((option) => [
+    option.value,
+    option.labelKey,
+  ])
+);
+
+const TRANSPORT_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  TRANSPORT_OPTIONS.filter((option) => option.value !== "all").map((option) => [
+    option.value,
+    option.labelKey,
+  ])
+);
+
+function actionLabel(action: string, t: ReturnType<typeof useTranslation>["t"]): string {
+  const key = ACTION_LABEL_KEYS[action];
+  return key ? String(t(key)) : action;
+}
 
 function formatDuration(startedAt: string | null, endedAt: string | null): string {
   if (!startedAt || !endedAt) return "—";
@@ -67,10 +87,10 @@ function formatDuration(startedAt: string | null, endedAt: string | null): strin
   return `${(ms / 60000).toFixed(1)}m`;
 }
 
-function formatDateTime(ts: string | null): string {
+function formatDateTime(ts: string | null, locale: string): string {
   if (!ts) return "—";
   const date = new Date(ts);
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -80,25 +100,32 @@ function formatDateTime(ts: string | null): string {
   });
 }
 
-function formatChartLabel(ts: string, trunc: string): string {
+function formatChartLabel(ts: string, trunc: string, locale: string): string {
   const date = new Date(ts);
   if (trunc === "hour") {
-    return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   }
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
-function TransportBadge({ transport }: { transport: string }) {
+function TransportBadge({
+  transport,
+  t,
+}: {
+  transport: string;
+  t: ReturnType<typeof useTranslation>["t"];
+}) {
   const styles: Record<string, string> = {
     http: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
     mcp: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
     system: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
   };
+  const labelKey = TRANSPORT_LABEL_KEYS[transport];
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[transport] || styles.system}`}
     >
-      {transport}
+      {labelKey ? t(labelKey) : transport}
     </span>
   );
 }
@@ -106,6 +133,7 @@ function TransportBadge({ transport }: { transport: string }) {
 // ---- Chart Section ----
 
 function AuditChart({ bankId }: { bankId: string }) {
+  const { t, i18n } = useTranslation();
   const [period, setPeriod] = useState("7d");
   const [chartAction, setChartAction] = useState<string | null>(null);
   const [buckets, setBuckets] = useState<AuditStatsBucket[]>([]);
@@ -136,14 +164,14 @@ function AuditChart({ bankId }: { bankId: string }) {
   }, [bankId]);
 
   const chartData = buckets.map((b) => ({
-    time: formatChartLabel(b.time, trunc),
+    time: formatChartLabel(b.time, trunc, i18n.language),
     total: b.total,
   }));
 
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0 gap-3">
-        <CardTitle className="text-sm font-semibold">Request Volume</CardTitle>
+        <CardTitle className="text-sm font-semibold">{t("auditLogs.chart.title")}</CardTitle>
         <div className="flex gap-2">
           <Select
             value={chartAction || "all"}
@@ -159,7 +187,7 @@ function AuditChart({ bankId }: { bankId: string }) {
             <SelectContent position="popper" className="max-h-[300px] overflow-y-auto">
               {ACTION_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -175,7 +203,7 @@ function AuditChart({ bankId }: { bankId: string }) {
                 loadStats(opt.value, chartAction);
               }}
             >
-              {opt.label}
+              {t(opt.labelKey)}
             </Button>
           ))}
         </div>
@@ -184,11 +212,11 @@ function AuditChart({ bankId }: { bankId: string }) {
         <div className="h-[120px]">
           {loading ? (
             <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              Loading...
+              {t("common.loading")}
             </div>
           ) : chartData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              No data for this period
+              {t("auditLogs.chart.empty")}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -208,10 +236,12 @@ function AuditChart({ bankId }: { bankId: string }) {
                     fontSize: "12px",
                     padding: "4px 8px",
                   }}
+                  formatter={(value) => [value, t("auditLogs.chart.total")]}
                 />
                 <Line
                   type="monotone"
                   dataKey="total"
+                  name={t("auditLogs.chart.total")}
                   stroke="var(--primary)"
                   strokeWidth={2}
                   dot={false}
@@ -229,6 +259,7 @@ function AuditChart({ bankId }: { bankId: string }) {
 // ---- Main Component ----
 
 export function AuditLogsView() {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -333,12 +364,12 @@ export function AuditLogsView() {
       <div className="flex items-center gap-3 flex-wrap">
         <Select value={actionFilter || "all"} onValueChange={handleActionFilterChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All actions" />
+            <SelectValue placeholder={t("auditLogs.filters.allActions")} />
           </SelectTrigger>
           <SelectContent position="popper" className="max-h-[300px] overflow-y-auto">
             {ACTION_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+                {t(opt.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -346,12 +377,12 @@ export function AuditLogsView() {
 
         <Select value={transportFilter || "all"} onValueChange={handleTransportFilterChange}>
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="All transports" />
+            <SelectValue placeholder={t("auditLogs.filters.allTransports")} />
           </SelectTrigger>
           <SelectContent position="popper" className="max-h-[300px] overflow-y-auto">
             {TRANSPORT_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+                {t(opt.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -362,11 +393,11 @@ export function AuditLogsView() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
-            <SelectItem value="all">All time</SelectItem>
-            <SelectItem value="1h">Last hour</SelectItem>
-            <SelectItem value="1d">Last 24 hours</SelectItem>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
+            <SelectItem value="all">{t("auditLogs.dateRanges.allTime")}</SelectItem>
+            <SelectItem value="1h">{t("auditLogs.dateRanges.lastHour")}</SelectItem>
+            <SelectItem value="1d">{t("auditLogs.dateRanges.last24Hours")}</SelectItem>
+            <SelectItem value="7d">{t("auditLogs.dateRanges.last7Days")}</SelectItem>
+            <SelectItem value="30d">{t("auditLogs.dateRanges.last30Days")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -377,11 +408,11 @@ export function AuditLogsView() {
           disabled={loading}
         >
           <RefreshCw className={`w-4 h-4 mr-1 ${loading ? "animate-spin" : ""}`} />
-          Refresh
+          {t("common.actions.refresh")}
         </Button>
 
         <span className="text-sm text-muted-foreground ml-auto">
-          {total} {total === 1 ? "entry" : "entries"}
+          {t("auditLogs.count", { count: total })}
         </span>
       </div>
 
@@ -389,17 +420,17 @@ export function AuditLogsView() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[200px]">Time</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead className="w-[100px]">Transport</TableHead>
-            <TableHead className="w-[100px]">Duration</TableHead>
+            <TableHead className="w-[200px]">{t("auditLogs.columns.time")}</TableHead>
+            <TableHead>{t("auditLogs.columns.action")}</TableHead>
+            <TableHead className="w-[100px]">{t("auditLogs.columns.transport")}</TableHead>
+            <TableHead className="w-[100px]">{t("auditLogs.columns.duration")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {logs.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                {loading ? "Loading..." : "No audit logs found"}
+                {loading ? t("common.loading") : t("auditLogs.empty")}
               </TableCell>
             </TableRow>
           ) : (
@@ -410,11 +441,11 @@ export function AuditLogsView() {
                 onClick={() => handleLogClick(log)}
               >
                 <TableCell className="text-sm font-mono">
-                  {formatDateTime(log.started_at)}
+                  {formatDateTime(log.started_at, i18n.language)}
                 </TableCell>
-                <TableCell className="font-medium">{log.action}</TableCell>
+                <TableCell className="font-medium">{actionLabel(log.action, t)}</TableCell>
                 <TableCell>
-                  <TransportBadge transport={log.transport} />
+                  <TransportBadge transport={log.transport} t={t} />
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground font-mono">
                   {formatDuration(log.started_at, log.ended_at)}
@@ -429,7 +460,7 @@ export function AuditLogsView() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
+            {t("auditLogs.pagination.page", { current: currentPage, total: totalPages })}
           </span>
           <div className="flex gap-2">
             <Button
@@ -439,7 +470,7 @@ export function AuditLogsView() {
               disabled={offset === 0}
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
+              {t("common.actions.previous")}
             </Button>
             <Button
               variant="outline"
@@ -447,7 +478,7 @@ export function AuditLogsView() {
               onClick={() => handlePageChange(offset + limit)}
               disabled={offset + limit >= total}
             >
-              Next
+              {t("common.actions.next")}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -458,25 +489,31 @@ export function AuditLogsView() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Audit Log: {selectedLog?.action}</DialogTitle>
+            <DialogTitle>
+              {t("auditLogs.detail.title", {
+                action: selectedLog ? actionLabel(selectedLog.action, t) : "",
+              })}
+            </DialogTitle>
           </DialogHeader>
           {selectedLog && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Action:</span>{" "}
-                  <span className="font-medium">{selectedLog.action}</span>
+                  <span className="text-muted-foreground">{t("auditLogs.detail.action")}:</span>{" "}
+                  <span className="font-medium">{actionLabel(selectedLog.action, t)}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Transport:</span>{" "}
-                  <TransportBadge transport={selectedLog.transport} />
+                  <span className="text-muted-foreground">{t("auditLogs.detail.transport")}:</span>{" "}
+                  <TransportBadge transport={selectedLog.transport} t={t} />
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Started:</span>{" "}
-                  <span className="font-mono">{formatDateTime(selectedLog.started_at)}</span>
+                  <span className="text-muted-foreground">{t("auditLogs.detail.started")}:</span>{" "}
+                  <span className="font-mono">
+                    {formatDateTime(selectedLog.started_at, i18n.language)}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Duration:</span>{" "}
+                  <span className="text-muted-foreground">{t("auditLogs.detail.duration")}:</span>{" "}
                   <span className="font-mono">
                     {formatDuration(selectedLog.started_at, selectedLog.ended_at)}
                   </span>
@@ -485,7 +522,7 @@ export function AuditLogsView() {
 
               {selectedLog.request && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">Request</h4>
+                  <h4 className="text-sm font-semibold mb-2">{t("auditLogs.detail.request")}</h4>
                   <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto max-h-[200px] overflow-y-auto">
                     {JSON.stringify(selectedLog.request, null, 2)}
                   </pre>
@@ -494,7 +531,7 @@ export function AuditLogsView() {
 
               {selectedLog.response && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">Response</h4>
+                  <h4 className="text-sm font-semibold mb-2">{t("auditLogs.detail.response")}</h4>
                   <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto max-h-[200px] overflow-y-auto">
                     {JSON.stringify(selectedLog.response, null, 2)}
                   </pre>
@@ -503,7 +540,7 @@ export function AuditLogsView() {
 
               {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">Metadata</h4>
+                  <h4 className="text-sm font-semibold mb-2">{t("auditLogs.detail.metadata")}</h4>
                   <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
                     {JSON.stringify(selectedLog.metadata, null, 2)}
                   </pre>

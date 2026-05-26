@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dataplaneBankUrl, getDataplaneHeaders } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(
   request: NextRequest,
@@ -15,12 +16,24 @@ export async function GET(
 
     const data = await response.json();
     if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          ...data,
+          errorKey: data.errorKey ?? "api.errors.banks.exportTemplate",
+        }),
+        { status: response.status }
+      );
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Error exporting bank template:", error);
-    return NextResponse.json({ error: "Failed to export bank template" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to export bank template",
+        errorKey: "api.errors.banks.exportTemplate",
+      }),
+      { status: 500 }
+    );
   }
 }

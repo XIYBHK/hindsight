@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sdk, lowLevelClient } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(
   request: NextRequest,
@@ -14,6 +15,12 @@ export async function GET(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch stats",
+        errorKey: "api.errors.stats.fetch",
+      }),
+      { status: 500 }
+    );
   }
 }

@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 import { sdk, lowLevelClient } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const response = await sdk.listBanks({ client: lowLevelClient });
 
     // Check if the response has an error or no data
     if (response.error || !response.data) {
       console.error("API error:", response.error);
-      return NextResponse.json({ error: "Failed to fetch banks from API" }, { status: 500 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "Failed to fetch banks from API",
+          errorKey: "api.errors.banks.fetchFromApi",
+        }),
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error fetching banks:", error);
-    return NextResponse.json({ error: "Failed to fetch banks" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch banks",
+        errorKey: "api.errors.banks.fetch",
+      }),
+      { status: 500 }
+    );
   }
 }
 
@@ -24,7 +37,13 @@ export async function POST(request: Request) {
     const { bank_id } = body;
 
     if (!bank_id) {
-      return NextResponse.json({ error: "bank_id is required" }, { status: 400 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "bank_id is required",
+          errorKey: "api.errors.validation.bankIdRequired",
+        }),
+        { status: 400 }
+      );
     }
 
     const response = await sdk.createOrUpdateBank({
@@ -37,6 +56,12 @@ export async function POST(request: Request) {
     return NextResponse.json(serializedData, { status: 201 });
   } catch (error) {
     console.error("Error creating bank:", error);
-    return NextResponse.json({ error: "Failed to create bank" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to create bank",
+        errorKey: "api.errors.banks.create",
+      }),
+      { status: 500 }
+    );
   }
 }

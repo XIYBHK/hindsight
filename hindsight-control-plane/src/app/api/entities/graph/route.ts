@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sdk, lowLevelClient } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,7 +8,13 @@ export async function GET(request: NextRequest) {
     const bankId = searchParams.get("bank_id");
 
     if (!bankId) {
-      return NextResponse.json({ error: "bank_id is required" }, { status: 400 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "bank_id is required",
+          errorKey: "api.errors.validation.bankIdRequired",
+        }),
+        { status: 400 }
+      );
     }
 
     const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : undefined;
@@ -24,7 +31,10 @@ export async function GET(request: NextRequest) {
     if (response.error || !response.data) {
       console.error("Entity graph API error:", response.error);
       return NextResponse.json(
-        { error: response.error || "Failed to fetch entity graph" },
+        localizeApiErrorPayload(request, {
+          error: response.error || "Failed to fetch entity graph",
+          errorKey: "api.errors.entities.graph",
+        }),
         { status: 500 }
       );
     }
@@ -32,6 +42,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error fetching entity graph:", error);
-    return NextResponse.json({ error: "Failed to fetch entity graph" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch entity graph",
+        errorKey: "api.errors.entities.graph",
+      }),
+      { status: 500 }
+    );
   }
 }

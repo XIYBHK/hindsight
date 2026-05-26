@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { client } from "@/lib/api";
 import { useBank } from "@/lib/bank-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -43,6 +44,7 @@ interface MemoryDetailModalProps {
 }
 
 export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetailModalProps) {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [memory, setMemory] = useState<MemoryDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -158,20 +160,26 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
 
   // Determine the display title based on memory type
   const getMemoryTypeTitle = () => {
-    if (memory?.type === "observation") return "Observation";
-    if (memory?.type === "world") return "World Fact";
-    if (memory?.type === "experience") return "Experience";
-    return "Memory Details";
+    if (memory?.type === "observation") return t("factTypes.observation");
+    if (memory?.type === "world") return t("dataTabs.worldFacts");
+    if (memory?.type === "experience") return t("factTypes.experience");
+    return t("memoryDetails.title");
   };
 
   const isObservation = memory?.type === "observation";
+  const getFactTypeLabel = (type?: string | null) => {
+    if (type === "world") return t("factTypes.world");
+    if (type === "experience") return t("factTypes.experience");
+    if (type === "observation") return t("factTypes.observation");
+    return type ?? "";
+  };
 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>{memory ? getMemoryTypeTitle() : "Memory Details"}</DialogTitle>
+            <DialogTitle>{memory ? getMemoryTypeTitle() : t("memoryDetails.title")}</DialogTitle>
           </DialogHeader>
 
           {loading ? (
@@ -181,7 +189,9 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
           ) : error ? (
             <div className="flex items-center justify-center py-20">
               <div className="text-center text-destructive">
-                <div className="text-sm">Error: {error}</div>
+                <div className="text-sm">
+                  {t("common.error")}: {error}
+                </div>
               </div>
             </div>
           ) : memory ? (
@@ -195,11 +205,11 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="memory" className="flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5" />
-                    Observation
+                    {t("factTypes.observation")}
                   </TabsTrigger>
                   <TabsTrigger value="history" className="flex items-center gap-1.5">
                     <History className="w-3.5 h-3.5" />
-                    History
+                    {t("memoryDetails.history")}
                     {history && history.length > 0 ? ` (${history.length})` : ""}
                   </TabsTrigger>
                 </TabsList>
@@ -209,7 +219,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {/* Text */}
                     <div>
                       <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                        Text
+                        {t("common.labels.text")}
                       </div>
                       <p className="text-sm text-foreground leading-relaxed">{memory.text}</p>
                     </div>
@@ -218,17 +228,17 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.occurred_start && (
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                          Occurred
+                          {t("observationHistory.occurred")}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-foreground">
                           <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <span>
-                            {new Date(memory.occurred_start).toLocaleString()}
+                            {new Date(memory.occurred_start).toLocaleString(i18n.language)}
                             {memory.occurred_end &&
                               memory.occurred_end !== memory.occurred_start && (
                                 <>
                                   <span className="text-muted-foreground mx-1">→</span>
-                                  {new Date(memory.occurred_end).toLocaleString()}
+                                  {new Date(memory.occurred_end).toLocaleString(i18n.language)}
                                 </>
                               )}
                           </span>
@@ -239,11 +249,11 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.mentioned_at && (
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                          Mentioned
+                          {t("observationHistory.mentioned")}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-foreground">
                           <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span>{new Date(memory.mentioned_at).toLocaleString()}</span>
+                          <span>{new Date(memory.mentioned_at).toLocaleString(i18n.language)}</span>
                         </div>
                       </div>
                     )}
@@ -253,7 +263,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                           <Users className="w-3 h-3" />
-                          Entities
+                          {t("navigation.entities")}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {memory.entities.map((entity, idx) => (
@@ -276,7 +286,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                           <Tag className="w-3 h-3" />
-                          Observation Scopes
+                          {t("memoryDetails.observationScopes")}
                         </div>
                         {typeof memory.observation_scopes === "string" ? (
                           <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
@@ -296,7 +306,9 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.source_memories && memory.source_memories.length > 0 && (
                       <div className="border-t border-border pt-4">
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-3">
-                          Source Memories ({memory.source_memories.length})
+                          {t("memoryDetails.sourceMemories", {
+                            count: memory.source_memories.length,
+                          })}
                         </div>
                         <div className="space-y-3">
                           {memory.source_memories.map((source, i) => (
@@ -312,7 +324,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                                       : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
                                   }`}
                                 >
-                                  {source.type}
+                                  {getFactTypeLabel(source.type)}
                                 </span>
                                 <Button
                                   variant="outline"
@@ -320,29 +332,35 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                                   className="h-6 text-xs"
                                   onClick={() => setSourceMemoryModalId(source.id)}
                                 >
-                                  View
+                                  {t("common.actions.view")}
                                 </Button>
                               </div>
                               <p className="text-sm text-foreground mb-2">{source.text}</p>
                               {source.context && (
                                 <p className="text-xs text-muted-foreground mb-2 italic">
-                                  Context: {source.context}
+                                  {t("common.labels.context")}: {source.context}
                                 </p>
                               )}
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 {source.occurred_start && (
                                   <div className="p-2 bg-background/50 rounded">
-                                    <div className="text-muted-foreground mb-0.5">Occurred</div>
+                                    <div className="text-muted-foreground mb-0.5">
+                                      {t("observationHistory.occurred")}
+                                    </div>
                                     <div className="font-medium">
-                                      {new Date(source.occurred_start).toLocaleString()}
+                                      {new Date(source.occurred_start).toLocaleString(
+                                        i18n.language
+                                      )}
                                     </div>
                                   </div>
                                 )}
                                 {source.mentioned_at && (
                                   <div className="p-2 bg-background/50 rounded">
-                                    <div className="text-muted-foreground mb-0.5">Mentioned</div>
+                                    <div className="text-muted-foreground mb-0.5">
+                                      {t("observationHistory.mentioned")}
+                                    </div>
                                     <div className="font-medium">
-                                      {new Date(source.mentioned_at).toLocaleString()}
+                                      {new Date(source.mentioned_at).toLocaleString(i18n.language)}
                                     </div>
                                   </div>
                                 )}
@@ -356,7 +374,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {/* ID */}
                     <div>
                       <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                        Memory ID
+                        {t("memoryDetails.memoryId")}
                       </div>
                       <code className="text-xs font-mono text-muted-foreground break-all">
                         {memory.id}
@@ -382,7 +400,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       />
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        No history recorded yet.
+                        {t("memoryDetails.noHistory")}
                       </p>
                     )}
                   </TabsContent>
@@ -398,7 +416,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="memory" className="flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5" />
-                    {memory.type === "world" ? "World Fact" : "Experience"}
+                    {memory.type === "world" ? t("dataTabs.worldFacts") : t("factTypes.experience")}
                   </TabsTrigger>
                   <TabsTrigger
                     value="chunk"
@@ -406,7 +424,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     className="flex items-center gap-1.5"
                   >
                     <Layers className="w-3.5 h-3.5" />
-                    Chunk
+                    {t("documents.detail.chunk")}
                   </TabsTrigger>
                   <TabsTrigger
                     value="document"
@@ -414,7 +432,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     className="flex items-center gap-1.5"
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    Document
+                    {t("documents.detail.document")}
                   </TabsTrigger>
                 </TabsList>
 
@@ -423,7 +441,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {/* Memory text */}
                     <div>
                       <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                        Text
+                        {t("common.labels.text")}
                       </div>
                       <p className="text-sm text-foreground leading-relaxed">{memory.text}</p>
                     </div>
@@ -432,7 +450,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.context && (
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                          Context
+                          {t("common.labels.context")}
                         </div>
                         <div className="text-sm text-foreground">{memory.context}</div>
                       </div>
@@ -442,17 +460,17 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.occurred_start && (
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                          Occurred
+                          {t("observationHistory.occurred")}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-foreground">
                           <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <span>
-                            {new Date(memory.occurred_start).toLocaleString()}
+                            {new Date(memory.occurred_start).toLocaleString(i18n.language)}
                             {memory.occurred_end &&
                               memory.occurred_end !== memory.occurred_start && (
                                 <>
                                   <span className="text-muted-foreground mx-1">→</span>
-                                  {new Date(memory.occurred_end).toLocaleString()}
+                                  {new Date(memory.occurred_end).toLocaleString(i18n.language)}
                                 </>
                               )}
                           </span>
@@ -463,11 +481,11 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {memory.mentioned_at && (
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                          Mentioned
+                          {t("observationHistory.mentioned")}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-foreground">
                           <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span>{new Date(memory.mentioned_at).toLocaleString()}</span>
+                          <span>{new Date(memory.mentioned_at).toLocaleString(i18n.language)}</span>
                         </div>
                       </div>
                     )}
@@ -477,7 +495,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                           <Users className="w-3 h-3" />
-                          Entities
+                          {t("navigation.entities")}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {memory.entities.map((entity, idx) => (
@@ -500,7 +518,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       <div>
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                           <Tag className="w-3 h-3" />
-                          Observation Scopes
+                          {t("memoryDetails.observationScopes")}
                         </div>
                         {typeof memory.observation_scopes === "string" ? (
                           <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
@@ -519,7 +537,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                     {/* ID */}
                     <div>
                       <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                        Memory ID
+                        {t("memoryDetails.memoryId")}
                       </div>
                       <code className="text-xs font-mono text-muted-foreground break-all">
                         {memory.id}
@@ -537,17 +555,19 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                         <div className="grid grid-cols-2 gap-3">
                           <div className="p-3 bg-muted rounded-lg">
                             <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                              Chunk Index
+                              {t("documents.detail.chunkIndex")}
                             </div>
                             <div className="text-sm text-foreground">{chunk.chunk_index}</div>
                           </div>
                           {chunk.chunk_text && (
                             <div className="p-3 bg-muted rounded-lg">
                               <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                                Text Length
+                                {t("documents.detail.textLength")}
                               </div>
                               <div className="text-sm text-foreground">
-                                {chunk.chunk_text.length.toLocaleString()} chars
+                                {t("documents.detail.charactersShort", {
+                                  count: chunk.chunk_text.length,
+                                })}
                               </div>
                             </div>
                           )}
@@ -556,7 +576,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                         {chunk.chunk_text && (
                           <div>
                             <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                              Chunk Text
+                              {t("documents.detail.chunkText")}
                             </div>
                             <div className="p-4 bg-muted rounded-lg border border-border max-h-[300px] overflow-y-auto">
                               <pre className="text-sm whitespace-pre-wrap font-mono text-foreground">
@@ -568,7 +588,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
 
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                            Chunk ID
+                            {t("documents.detail.chunkId")}
                           </div>
                           <code className="text-xs font-mono text-muted-foreground break-all">
                             {chunk.chunk_id}
@@ -577,7 +597,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       </>
                     ) : (
                       <div className="text-center py-12 text-muted-foreground">
-                        No chunk data available
+                        {t("documents.detail.noChunkData")}
                       </div>
                     )}
                   </TabsContent>
@@ -593,16 +613,16 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                           {document.created_at && (
                             <div className="p-3 bg-muted rounded-lg">
                               <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                                Created
+                                {t("operations.columns.created")}
                               </div>
                               <div className="text-sm text-foreground">
-                                {new Date(document.created_at).toLocaleString()}
+                                {new Date(document.created_at).toLocaleString(i18n.language)}
                               </div>
                             </div>
                           )}
                           <div className="p-3 bg-muted rounded-lg">
                             <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                              Memory Units
+                              {t("documents.columns.memoryUnits")}
                             </div>
                             <div className="text-sm text-foreground">
                               {document.memory_unit_count}
@@ -614,16 +634,18 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                           <>
                             <div className="p-3 bg-muted rounded-lg">
                               <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                                Text Length
+                                {t("documents.detail.textLength")}
                               </div>
                               <div className="text-sm text-foreground">
-                                {document.original_text.length.toLocaleString()} chars
+                                {t("documents.detail.charactersShort", {
+                                  count: document.original_text.length,
+                                })}
                               </div>
                             </div>
 
                             <div>
                               <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                                Original Text
+                                {t("documents.detail.originalText")}
                               </div>
                               <div className="p-4 bg-muted rounded-lg border border-border max-h-[300px] overflow-y-auto">
                                 <pre className="text-sm whitespace-pre-wrap font-mono text-foreground">
@@ -642,7 +664,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
 
                         <div className="p-3 bg-muted rounded-lg">
                           <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                            Document ID
+                            {t("documents.columns.documentId")}
                           </div>
                           <code className="text-xs font-mono text-muted-foreground break-all">
                             {document.id}
@@ -651,7 +673,7 @@ export function MemoryDetailModal({ memoryId, onClose, initialTab }: MemoryDetai
                       </>
                     ) : (
                       <div className="text-center py-12 text-muted-foreground">
-                        No document data available
+                        {t("documents.detail.noDocumentData")}
                       </div>
                     )}
                   </TabsContent>

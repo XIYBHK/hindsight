@@ -39,7 +39,7 @@ type TagsMatch = "any" | "all" | "any_strict" | "all_strict";
 type ViewMode = "results" | "trace" | "json";
 
 export function SearchDebugView() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
 
   // Query state
@@ -90,6 +90,17 @@ export function SearchDebugView() {
   };
 
   const INITIAL_RESULTS_COUNT = 5;
+
+  const formatFactType = (factType: string): string =>
+    String(t(`factTypes.${factType}`, { defaultValue: factType }));
+
+  const formatTraceMethod = (methodName: string): string =>
+    String(t(`recall.traceMethods.${methodName}`, { defaultValue: methodName }));
+
+  const formatResultsToggle = (showAll: boolean, count: number): string =>
+    showAll
+      ? String(t("recall.traceActions.showLess"))
+      : String(t("recall.traceActions.viewAllResults", { count }));
 
   // Helper to find full memory data from results when clicking trace items
   const selectMemoryFromTrace = (traceResult: any) => {
@@ -367,10 +378,18 @@ export function SearchDebugView() {
                         <p className="text-sm text-foreground">{obs.text}</p>
                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                           <span className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-600">
-                            Observation
+                            {t("recall.observations.label")}
                           </span>
-                          <span>Proof count: {obs.proof_count || 1}</span>
-                          <span>Relevance: {(obs.relevance || 0).toFixed(3)}</span>
+                          <span>
+                            {t("recall.observations.proofCount", {
+                              count: obs.proof_count || 1,
+                            })}
+                          </span>
+                          <span>
+                            {t("recall.observations.relevance", {
+                              score: (obs.relevance || 0).toFixed(3),
+                            })}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -407,14 +426,16 @@ export function SearchDebugView() {
                               <p className="text-foreground">{result.text}</p>
                               <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                                 <span className="px-2 py-0.5 rounded bg-muted capitalize">
-                                  {result.type || "world"}
+                                  {formatFactType(result.type || "world")}
                                 </span>
                                 {result.context && (
                                   <span className="truncate max-w-xs">{result.context}</span>
                                 )}
                                 {result.occurred_start && (
                                   <span>
-                                    {new Date(result.occurred_start).toLocaleDateString()}
+                                    {new Date(result.occurred_start).toLocaleDateString(
+                                      i18n.language
+                                    )}
                                   </span>
                                 )}
                               </div>
@@ -517,16 +538,18 @@ export function SearchDebugView() {
                                     className={`w-8 h-8 rounded-lg ${colors.bg} flex items-center justify-center`}
                                   >
                                     <span className={`text-sm font-bold ${colors.text} capitalize`}>
-                                      {factType.charAt(0).toUpperCase()}
+                                      {formatFactType(factType).charAt(0).toUpperCase()}
                                     </span>
                                   </div>
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                       <span className="font-semibold text-foreground capitalize">
-                                        {factType}
+                                        {formatFactType(factType)}
                                       </span>
                                       <span className="text-xs text-muted-foreground">
-                                        {methods.length} methods
+                                        {t("recall.traceLabels.methods", {
+                                          count: methods.length,
+                                        })}
                                       </span>
                                     </div>
                                     {/* Method summary pills */}
@@ -536,7 +559,10 @@ export function SearchDebugView() {
                                           key={mIdx}
                                           className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground capitalize"
                                         >
-                                          {m.method_name}: {m.results?.length || 0}
+                                          {t("recall.traceLabels.methodResultCount", {
+                                            method: formatTraceMethod(m.method_name),
+                                            count: m.results?.length || 0,
+                                          })}
                                         </span>
                                       ))}
                                     </div>
@@ -591,7 +617,7 @@ export function SearchDebugView() {
                                               <div className="flex items-center justify-between mb-1">
                                                 <div className="flex items-center gap-2">
                                                   <span className="font-medium text-sm text-foreground capitalize">
-                                                    {method.method_name}
+                                                    {formatTraceMethod(method.method_name)}
                                                   </span>
                                                   {/* Show temporal range inline */}
                                                   {method.method_name === "temporal" &&
@@ -601,14 +627,14 @@ export function SearchDebugView() {
                                                         {method.metadata.constraint.start
                                                           ? new Date(
                                                               method.metadata.constraint.start
-                                                            ).toLocaleDateString()
-                                                          : "any"}
+                                                            ).toLocaleDateString(i18n.language)
+                                                          : t("recall.traceLabels.anyDate")}
                                                         {" → "}
                                                         {method.metadata.constraint.end
                                                           ? new Date(
                                                               method.metadata.constraint.end
-                                                            ).toLocaleDateString()
-                                                          : "any"}
+                                                            ).toLocaleDateString(i18n.language)
+                                                          : t("recall.traceLabels.anyDate")}
                                                       </span>
                                                     )}
                                                 </div>
@@ -680,9 +706,10 @@ export function SearchDebugView() {
                                                           toggleExpandResults(resultsKey);
                                                         }}
                                                       >
-                                                        {showAll
-                                                          ? `Show less`
-                                                          : `View all ${methodResults.length} results`}
+                                                        {formatResultsToggle(
+                                                          showAll,
+                                                          methodResults.length
+                                                        )}
                                                       </button>
                                                     )}
                                                   </div>
@@ -750,11 +777,11 @@ export function SearchDebugView() {
                                   {t("recall.rrfFusion")}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                                  merge
+                                  {t("recall.traceLabels.merge")}
                                 </span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-0.5">
-                                Reciprocal Rank Fusion of all retrieval results
+                                {t("recall.traceDescriptions.rrf")}
                               </div>
                             </div>
                             <div className="text-2xl font-bold text-foreground">
@@ -800,7 +827,9 @@ export function SearchDebugView() {
                                         {r.text}
                                       </p>
                                       <div className="text-xs text-muted-foreground mt-1">
-                                        RRF Score: {(r.rrf_score || r.score || 0).toFixed(4)}
+                                        {t("recall.traceLabels.rrfScore", {
+                                          score: (r.rrf_score || r.score || 0).toFixed(4),
+                                        })}
                                       </div>
                                     </div>
                                   </div>
@@ -814,9 +843,7 @@ export function SearchDebugView() {
                                     toggleExpandResults(resultsKey);
                                   }}
                                 >
-                                  {showAll
-                                    ? `Show less`
-                                    : `View all ${trace.rrf_merged.length} results`}
+                                  {formatResultsToggle(showAll, trace.rrf_merged.length)}
                                 </button>
                               )}
                             </div>
@@ -851,10 +878,10 @@ export function SearchDebugView() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="font-semibold text-foreground">
-                                  Combined Scoring
+                                  {t("recall.traceLabels.combinedScoring")}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                                  rerank
+                                  {t("recall.traceLabels.rerank")}
                                 </span>
                               </div>
                               <div className="text-sm text-muted-foreground mt-0.5">
@@ -912,18 +939,24 @@ export function SearchDebugView() {
                                             = {(r.rerank_score || r.score || 0).toFixed(4)}
                                           </span>
                                           {sc.cross_encoder_score_normalized !== undefined && (
-                                            <span title="Cross-encoder score (primary relevance signal)">
+                                            <span title={t("recall.traceTooltips.crossEncoder")}>
                                               CE: {sc.cross_encoder_score_normalized.toFixed(3)}
                                             </span>
                                           )}
                                           {sc.temporal !== undefined && sc.temporal !== 0.5 && (
-                                            <span title="Temporal proximity boost (±10% — only active for temporal queries)">
-                                              Tmp: {sc.temporal.toFixed(3)}
+                                            <span title={t("recall.traceTooltips.temporal")}>
+                                              {t("recall.traceLabels.temporalShort", {
+                                                defaultValue: "Tmp",
+                                              })}
+                                              : {sc.temporal.toFixed(3)}
                                             </span>
                                           )}
                                           {sc.recency !== undefined && (
-                                            <span title="Recency boost (±10% — based on memory age)">
-                                              Rec: {sc.recency.toFixed(3)}
+                                            <span title={t("recall.traceTooltips.recency")}>
+                                              {t("recall.traceLabels.recencyShort", {
+                                                defaultValue: "Rec",
+                                              })}
+                                              : {sc.recency.toFixed(3)}
                                             </span>
                                           )}
                                         </div>
@@ -940,9 +973,7 @@ export function SearchDebugView() {
                                     toggleExpandResults(resultsKey);
                                   }}
                                 >
-                                  {showAll
-                                    ? `Show less`
-                                    : `View all ${trace.reranked.length} results`}
+                                  {formatResultsToggle(showAll, trace.reranked.length)}
                                 </button>
                               )}
                             </div>
@@ -970,11 +1001,11 @@ export function SearchDebugView() {
                           {t("recall.finalResults")}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary">
-                          output
+                          {t("recall.traceLabels.output")}
                         </span>
                       </div>
                       <div className="text-sm text-muted-foreground mt-0.5">
-                        Top results after all processing steps
+                        {t("recall.traceDescriptions.finalResults")}
                       </div>
                     </div>
                     <div className="text-2xl font-bold text-primary">{results?.length || 0}</div>

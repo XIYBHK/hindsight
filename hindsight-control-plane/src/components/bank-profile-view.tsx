@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useRouter } from "next/navigation";
@@ -127,32 +128,39 @@ interface Directive {
 
 const TRAIT_LABELS: Record<
   keyof DispositionTraits,
-  { label: string; shortLabel: string; description: string; lowLabel: string; highLabel: string }
+  {
+    labelKey: string;
+    shortLabel: string;
+    descriptionKey: string;
+    lowLabelKey: string;
+    highLabelKey: string;
+  }
 > = {
   skepticism: {
-    label: "Skepticism",
+    labelKey: "bankProfile.traits.skepticism.label",
     shortLabel: "S",
-    description: "How skeptical vs trusting when forming observations",
-    lowLabel: "Trusting",
-    highLabel: "Skeptical",
+    descriptionKey: "bankProfile.traits.skepticism.description",
+    lowLabelKey: "bankProfile.traits.skepticism.low",
+    highLabelKey: "bankProfile.traits.skepticism.high",
   },
   literalism: {
-    label: "Literalism",
+    labelKey: "bankProfile.traits.literalism.label",
     shortLabel: "L",
-    description: "How literally to interpret information when forming observations",
-    lowLabel: "Flexible",
-    highLabel: "Literal",
+    descriptionKey: "bankProfile.traits.literalism.description",
+    lowLabelKey: "bankProfile.traits.literalism.low",
+    highLabelKey: "bankProfile.traits.literalism.high",
   },
   empathy: {
-    label: "Empathy",
+    labelKey: "bankProfile.traits.empathy.label",
     shortLabel: "E",
-    description: "How much to consider emotional context when forming observations",
-    lowLabel: "Detached",
-    highLabel: "Empathetic",
+    descriptionKey: "bankProfile.traits.empathy.description",
+    lowLabelKey: "bankProfile.traits.empathy.low",
+    highLabelKey: "bankProfile.traits.empathy.high",
   },
 };
 
 export function BankProfileView({ hideReflectFields = false }: { hideReflectFields?: boolean }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { currentBank, setCurrentBank, loadBanks } = useBank();
   const { features } = useFeatures();
@@ -278,8 +286,8 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
       const result = await client.clearObservations(currentBank);
       setShowClearObservationsDialog(false);
       await loadData();
-      toast.success("Success", {
-        description: result.message || "Observations cleared successfully",
+      toast.success(t("common.success"), {
+        description: result.message || t("dialogs.clearObservations.success"),
       });
     } catch (error) {
       // Error toast is shown automatically by the API client interceptor
@@ -369,10 +377,10 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
     return (
       <Card>
         <CardContent className="p-10 text-center">
-          <h3 className="text-xl font-semibold mb-2 text-card-foreground">No Bank Selected</h3>
-          <p className="text-muted-foreground">
-            Please select a memory bank from the dropdown above to view its profile.
-          </p>
+          <h3 className="text-xl font-semibold mb-2 text-card-foreground">
+            {t("common.states.noBankSelected")}
+          </h3>
+          <p className="text-muted-foreground">{t("bankProfile.noBankDescription")}</p>
         </CardContent>
       </Card>
     );
@@ -383,7 +391,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
       <Card>
         <CardContent className="text-center py-10">
           <Clock className="w-12 h-12 mx-auto mb-3 text-muted-foreground animate-pulse" />
-          <div className="text-lg text-muted-foreground">Loading profile...</div>
+          <div className="text-lg text-muted-foreground">{t("bankProfile.loadingProfile")}</div>
         </CardContent>
       </Card>
     );
@@ -400,9 +408,9 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Brain className="w-5 h-5 text-primary" />
-                    Disposition Profile
+                    {t("bankProfile.disposition.title")}
                   </CardTitle>
-                  <CardDescription>Traits that shape the reasoning and perspective</CardDescription>
+                  <CardDescription>{t("bankProfile.traitsDescription")}</CardDescription>
                 </div>
                 <Button onClick={() => setShowDispositionDialog(true)} variant="ghost" size="sm">
                   <Pencil className="h-4 w-4" />
@@ -417,10 +425,10 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
                       <div className="flex justify-between items-center">
                         <div>
                           <label className="text-sm font-medium text-foreground">
-                            {TRAIT_LABELS[trait].label}
+                            {t(TRAIT_LABELS[trait].labelKey)}
                           </label>
                           <p className="text-xs text-muted-foreground">
-                            {TRAIT_LABELS[trait].description}
+                            {t(TRAIT_LABELS[trait].descriptionKey)}
                           </p>
                         </div>
                         <span className="text-sm font-bold text-primary">
@@ -429,7 +437,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
-                          {TRAIT_LABELS[trait].lowLabel}
+                          {t(TRAIT_LABELS[trait].lowLabelKey)}
                         </span>
                         <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                           <div
@@ -438,7 +446,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
                           />
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {TRAIT_LABELS[trait].highLabel}
+                          {t(TRAIT_LABELS[trait].highLabelKey)}
                         </span>
                       </div>
                     </div>
@@ -455,11 +463,9 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Target className="w-5 h-5 text-primary" />
-                    Mission
+                    {t("bankProfile.mission.title")}
                   </CardTitle>
-                  <CardDescription>
-                    Affects how observations, reflect, and mental models are created
-                  </CardDescription>
+                  <CardDescription>{t("bankProfile.mission.description")}</CardDescription>
                 </div>
                 <Button onClick={() => setShowMissionDialog(true)} variant="ghost" size="sm">
                   <Pencil className="h-4 w-4" />
@@ -468,8 +474,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
             </CardHeader>
             <CardContent>
               <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                {profile?.mission ||
-                  "No mission set. Set a mission to derive structural mental models and personalize reflect responses."}
+                {profile?.mission || t("bankProfile.mission.empty")}
               </p>
             </CardContent>
           </Card>
@@ -482,10 +487,10 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
           <div>
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-500" />
-              Directives
+              {t("bankProfile.directives.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Hard rules that must be followed during reflect
+              {t("bankProfile.directives.description")}
             </p>
           </div>
           <Button
@@ -495,7 +500,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
             className="h-8"
           >
             <Plus className="w-4 h-4 mr-1" />
-            Add
+            {t("common.actions.add")}
           </Button>
         </div>
         {directives.length > 0 ? (
@@ -538,9 +543,7 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
         ) : (
           <div className="p-6 border border-dashed border-rose-500/30 rounded-lg text-center">
             <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-rose-500/50" />
-            <p className="text-sm text-muted-foreground">
-              No directives yet. Directives are hard rules that must be followed during reflect.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("bankProfile.directives.empty")}</p>
           </div>
         )}
       </div>
@@ -549,28 +552,32 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Memory Bank</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialogs.deleteBank.title")}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
-                  Are you sure you want to delete the memory bank{" "}
+                  {t("dialogs.deleteBank.confirm")}{" "}
                   <span className="font-semibold text-foreground">{currentBank}</span>?
                 </p>
                 <p className="text-red-600 dark:text-red-400 font-medium">
-                  This action cannot be undone. All memories, entities, documents, and the bank
-                  profile will be permanently deleted.
+                  {t("dialogs.deleteBank.warning")}
                 </p>
                 {stats && (
                   <p>
-                    This will delete {stats.total_nodes} memories, {stats.total_documents}{" "}
-                    documents, and {stats.total_links} links.
+                    {t("bankProfile.dialogs.deleteBank.stats", {
+                      memories: stats.total_nodes,
+                      documents: stats.total_documents,
+                      links: stats.total_links,
+                    })}
                   </p>
                 )}
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t("common.actions.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteBank}
               disabled={isDeleting}
@@ -579,12 +586,12 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
               {isDeleting ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t("common.actions.deleting")}
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Bank
+                  {t("bankActions.deleteBank")}
                 </>
               )}
             </AlertDialogAction>
@@ -596,25 +603,30 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
       <AlertDialog open={showClearObservationsDialog} onOpenChange={setShowClearObservationsDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear Observations</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialogs.clearObservations.title")}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
-                  Are you sure you want to clear all observations for{" "}
+                  {t("dialogs.clearObservations.confirm")}{" "}
                   <span className="font-semibold text-foreground">{currentBank}</span>?
                 </p>
                 <p className="text-amber-600 dark:text-amber-400 font-medium">
-                  This will delete all consolidated knowledge. Observations will be regenerated the
-                  next time consolidation runs.
+                  {t("dialogs.clearObservations.warning")}
                 </p>
                 {stats && stats.total_observations > 0 && (
-                  <p>This will delete {stats.total_observations} observations.</p>
+                  <p>
+                    {t("bankProfile.dialogs.clearObservations.stats", {
+                      count: stats.total_observations,
+                    })}
+                  </p>
                 )}
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isClearingObservations}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isClearingObservations}>
+              {t("common.actions.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleClearObservations}
               disabled={isClearingObservations}
@@ -623,12 +635,12 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
               {isClearingObservations ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Clearing...
+                  {t("dialogs.clearObservations.clearing")}
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Clear Observations
+                  {t("bankActions.clearObservations")}
                 </>
               )}
             </AlertDialogAction>
@@ -654,24 +666,26 @@ export function BankProfileView({ hideReflectFields = false }: { hideReflectFiel
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Directive</AlertDialogTitle>
+            <AlertDialogTitle>{t("bankProfile.dialogs.deleteDirective.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{" "}
+              {t("bankProfile.dialogs.deleteDirective.confirm")}{" "}
               <span className="font-semibold">&quot;{directiveDeleteTarget?.name}&quot;</span>?
               <br />
               <br />
-              <span className="text-destructive font-semibold">This action cannot be undone.</span>
+              <span className="text-destructive font-semibold">
+                {t("common.warnings.cannotBeUndone")}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row justify-end space-x-2">
-            <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="mt-0">{t("common.actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteDirective}
               disabled={deletingDirective}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deletingDirective ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-              Delete
+              {t("common.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -733,6 +747,7 @@ function DispositionEditDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const { currentBank } = useBank();
   const [saving, setSaving] = useState(false);
   const [editDisposition, setEditDisposition] = useState<DispositionTraits>(disposition);
@@ -759,8 +774,8 @@ function DispositionEditDialog({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Edit Disposition Traits</DialogTitle>
-          <DialogDescription>Traits that shape the reasoning and perspective</DialogDescription>
+          <DialogTitle>{t("bankProfile.dialogs.disposition.title")}</DialogTitle>
+          <DialogDescription>{t("bankProfile.traitsDescription")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -769,15 +784,17 @@ function DispositionEditDialog({
               <div className="flex justify-between items-center">
                 <div>
                   <label className="text-sm font-medium text-foreground">
-                    {TRAIT_LABELS[trait].label}
+                    {t(TRAIT_LABELS[trait].labelKey)}
                   </label>
-                  <p className="text-xs text-muted-foreground">{TRAIT_LABELS[trait].description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t(TRAIT_LABELS[trait].descriptionKey)}
+                  </p>
                 </div>
                 <span className="text-sm font-bold text-primary">{editDisposition[trait]}/5</span>
               </div>
               <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>{TRAIT_LABELS[trait].lowLabel}</span>
-                <span>{TRAIT_LABELS[trait].highLabel}</span>
+                <span>{t(TRAIT_LABELS[trait].lowLabelKey)}</span>
+                <span>{t(TRAIT_LABELS[trait].highLabelKey)}</span>
               </div>
               <input
                 type="range"
@@ -796,16 +813,16 @@ function DispositionEditDialog({
 
         <DialogFooter>
           <Button onClick={onClose} variant="outline" disabled={saving}>
-            Cancel
+            {t("common.actions.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {t("common.actions.saving")}
               </>
             ) : (
-              "Save Changes"
+              t("common.actions.saveChanges")
             )}
           </Button>
         </DialogFooter>
@@ -825,6 +842,7 @@ function MissionEditDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const { currentBank } = useBank();
   const [saving, setSaving] = useState(false);
   const [editMission, setEditMission] = useState(mission);
@@ -849,17 +867,15 @@ function MissionEditDialog({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Edit Mission</DialogTitle>
-          <DialogDescription>
-            Affects how observations, reflect, and mental models are created
-          </DialogDescription>
+          <DialogTitle>{t("bankProfile.dialogs.mission.title")}</DialogTitle>
+          <DialogDescription>{t("bankProfile.mission.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 py-4">
           <Textarea
             value={editMission}
             onChange={(e) => setEditMission(e.target.value)}
-            placeholder="e.g., I am a PM for the engineering team. I help coordinate sprints and track project progress..."
+            placeholder={t("bankProfile.mission.placeholder")}
             rows={8}
             className="resize-none"
           />
@@ -867,16 +883,16 @@ function MissionEditDialog({
 
         <DialogFooter>
           <Button onClick={onClose} variant="outline" disabled={saving}>
-            Cancel
+            {t("common.actions.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {t("common.actions.saving")}
               </>
             ) : (
-              "Save Changes"
+              t("common.actions.saveChanges")
             )}
           </Button>
         </DialogFooter>
@@ -902,6 +918,7 @@ function DirectiveFormDialog({
   onCreated?: (d: Directive) => void;
   onSaved?: (d: Directive) => void;
 }) {
+  const { t } = useTranslation();
   const { currentBank } = useBank();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", content: "", tags: "" });
@@ -966,46 +983,53 @@ function DirectiveFormDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-rose-500" />
-            {mode === "create" ? "Create" : "Edit"} Directive
+            {mode === "create"
+              ? t("bankProfile.dialogs.directive.createTitle")
+              : t("bankProfile.dialogs.directive.editTitle")}
           </DialogTitle>
-          <DialogDescription>
-            Directives are hard rules that must be followed during reflect.
-          </DialogDescription>
+          <DialogDescription>{t("bankProfile.directives.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Name *</label>
+            <label className="text-sm font-medium text-foreground">
+              {t("bankProfile.directives.labels.nameRequired")}
+            </label>
             <Input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="e.g., Competitor Policy"
+              placeholder={t("bankProfile.directives.placeholders.name")}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Rule *</label>
+            <label className="text-sm font-medium text-foreground">
+              {t("bankProfile.directives.labels.ruleRequired")}
+            </label>
             <Textarea
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
-              placeholder="e.g., Never mention competitor products directly."
+              placeholder={t("bankProfile.directives.placeholders.rule")}
               className="min-h-[120px]"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Tags <span className="text-muted-foreground font-normal">(optional)</span>
+              {t("common.labels.tags")}{" "}
+              <span className="text-muted-foreground font-normal">
+                {t("common.labels.optional")}
+              </span>
             </label>
             <Input
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="e.g., project-x, team-alpha (comma-separated)"
+              placeholder={t("mentalModels.placeholders.tags")}
             />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={submitting}>
-            Cancel
+            {t("common.actions.cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -1013,7 +1037,7 @@ function DirectiveFormDialog({
             className="bg-rose-500 hover:bg-rose-600"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-            {mode === "create" ? "Create" : "Save"}
+            {mode === "create" ? t("common.actions.create") : t("common.actions.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1034,6 +1058,7 @@ function DirectiveDetailPanel({
   onDelete: () => void;
   onUpdated: (d: Directive) => void;
 }) {
+  const { t } = useTranslation();
   const [showEditModal, setShowEditModal] = useState(false);
 
   return (
@@ -1056,7 +1081,7 @@ function DirectiveDetailPanel({
                 </Button>
               </div>
               <span className="text-xs px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                directive
+                {t("reflect.directive")}
               </span>
             </div>
           </div>
@@ -1079,7 +1104,7 @@ function DirectiveDetailPanel({
           {/* Description */}
           <div>
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-              Rule
+              {t("bankProfile.directives.labels.rule")}
             </div>
             <div className="prose prose-base dark:prose-invert max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{directive.content}</ReactMarkdown>
@@ -1090,7 +1115,7 @@ function DirectiveDetailPanel({
           {directive.tags && directive.tags.length > 0 && (
             <div>
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Tags
+                {t("common.labels.tags")}
               </div>
               <div className="flex flex-wrap gap-2">
                 {directive.tags.map((tag) => (
@@ -1108,7 +1133,7 @@ function DirectiveDetailPanel({
           {/* ID */}
           <div>
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-              ID
+              {t("common.labels.id")}
             </div>
             <code className="text-sm font-mono break-all text-muted-foreground">
               {directive.id}

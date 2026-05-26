@@ -197,7 +197,7 @@ function BankSelectorInner() {
         try {
           manifest = JSON.parse(templateJson.trim());
         } catch {
-          setTemplateError("Invalid JSON. Please check the template syntax.");
+          setTemplateError(t("bankSelector.createDialog.errors.invalidTemplateJson"));
           setIsCreating(false);
           return;
         }
@@ -206,7 +206,9 @@ function BankSelectorInner() {
           await client.importBankTemplate(newBankId.trim(), manifest);
         } catch (importError) {
           setTemplateError(
-            importError instanceof Error ? importError.message : "Failed to import template"
+            importError instanceof Error
+              ? importError.message
+              : t("bankSelector.createDialog.errors.importTemplateFailed")
           );
           setIsCreating(false);
           return;
@@ -222,7 +224,11 @@ function BankSelectorInner() {
       setCurrentBank(newBankId.trim());
       router.push(bankRoute(newBankId.trim(), "?view=data"));
     } catch (error) {
-      setCreateError(error instanceof Error ? error.message : "Failed to create bank");
+      setCreateError(
+        error instanceof Error
+          ? error.message
+          : t("bankSelector.createDialog.errors.createBankFailed")
+      );
     } finally {
       setIsCreating(false);
     }
@@ -253,9 +259,14 @@ function BankSelectorInner() {
   const scopeLabel = (tags: string[]) => tags.join(", ");
 
   const scopeQuestion = (tags: string[]): string => {
-    if (tags.length === 1) return `What happened with ${tags[0]}?`;
+    if (tags.length === 1) {
+      return t("bankSelector.observationScopes.questionSingle", { tag: tags[0] });
+    }
     const allButLast = tags.slice(0, -1).join(", ");
-    return `What happened with ${allButLast} and ${tags[tags.length - 1]}?`;
+    return t("bankSelector.observationScopes.questionMultiple", {
+      tags: allButLast,
+      lastTag: tags[tags.length - 1],
+    });
   };
 
   const computeScopes = (
@@ -333,7 +344,9 @@ function BankSelectorInner() {
     setUploadProgress("");
 
     try {
-      setUploadProgress(`Uploading ${selectedFiles.length} file(s)...`);
+      setUploadProgress(
+        t("bankSelector.documentDialog.uploadingFiles", { count: selectedFiles.length })
+      );
 
       const perFileMeta = filesMetadata.map((meta) => ({
         ...(meta.context && { context: meta.context }),
@@ -612,7 +625,7 @@ function BankSelectorInner() {
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-          title="View on GitHub"
+          title={t("bankSelector.viewOnGithub")}
         >
           <Github className="h-5 w-5" />
           <span className="text-sm font-medium">{t("common.github")}</span>
@@ -627,7 +640,11 @@ function BankSelectorInner() {
           size="icon"
           onClick={toggleTheme}
           className="h-9 w-9"
-          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          title={
+            theme === "light"
+              ? t("bankSelector.theme.switchToDark")
+              : t("bankSelector.theme.switchToLight")
+          }
         >
           {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </Button>
@@ -639,7 +656,7 @@ function BankSelectorInner() {
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              title="Logout"
+              title={t("bankSelector.logout")}
               onClick={async () => {
                 try {
                   await fetch("/api/auth/logout", { method: "POST" });
@@ -656,11 +673,11 @@ function BankSelectorInner() {
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogContent className="sm:max-w-[550px]">
             <DialogHeader>
-              <DialogTitle>Create New Memory Bank</DialogTitle>
+              <DialogTitle>{t("bankSelector.createDialog.title")}</DialogTitle>
             </DialogHeader>
             <div className="py-4 space-y-4">
               <Input
-                placeholder="Enter bank ID..."
+                placeholder={t("bankSelector.createDialog.bankIdPlaceholder")}
                 value={newBankId}
                 onChange={(e) => setNewBankId(e.target.value)}
                 onKeyDown={(e) => {
@@ -682,7 +699,9 @@ function BankSelectorInner() {
                       }
                     }}
                   />
-                  <label className="text-sm font-medium">Import from template</label>
+                  <label className="text-sm font-medium">
+                    {t("bankSelector.createDialog.importFromTemplate")}
+                  </label>
                 </div>
                 {useTemplate && (
                   <a
@@ -691,15 +710,14 @@ function BankSelectorInner() {
                     rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Browse templates &rarr;
+                    {t("bankSelector.createDialog.browseTemplates")} &rarr;
                   </a>
                 )}
               </div>
               {useTemplate && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">
-                    Paste a template manifest JSON to pre-configure the bank with settings, mental
-                    models, and directives.
+                    {t("bankSelector.createDialog.templateDescription")}
                   </p>
                   <Textarea
                     placeholder='{"version": "1", "bank": {...}, "mental_models": [...]}'
@@ -729,10 +747,10 @@ function BankSelectorInner() {
                   setTemplateError(null);
                 }}
               >
-                Cancel
+                {t("common.actions.cancel")}
               </Button>
               <Button onClick={handleCreateBank} disabled={isCreating || !newBankId.trim()}>
-                {isCreating ? "Creating..." : "Create"}
+                {isCreating ? t("common.actions.creating") : t("common.actions.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -741,9 +759,9 @@ function BankSelectorInner() {
         <Dialog open={docDialogOpen} onOpenChange={setDocDialogOpen}>
           <DialogContent className="sm:max-w-[750px] max-h-[90vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Add New Document</DialogTitle>
+              <DialogTitle>{t("bankSelector.documentDialog.title")}</DialogTitle>
               <p className="text-sm text-muted-foreground">
-                Add a new document to memory bank:{" "}
+                {t("bankSelector.documentDialog.description")}{" "}
                 <span className="font-semibold">{currentBank}</span>
               </p>
             </DialogHeader>
@@ -754,7 +772,7 @@ function BankSelectorInner() {
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="text" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    Text
+                    {t("common.labels.text")}
                   </TabsTrigger>
                   <TabsTrigger
                     value="upload"
@@ -766,16 +784,18 @@ function BankSelectorInner() {
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
-                    Upload Files
+                    {t("bankSelector.documentDialog.uploadFiles")}
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="text" className="mt-3">
-                  <label className="font-bold block mb-1 text-sm text-foreground">Content *</label>
+                  <label className="font-bold block mb-1 text-sm text-foreground">
+                    {t("bankSelector.documentDialog.contentRequired")}
+                  </label>
                   <Textarea
                     value={docContent}
                     onChange={(e) => setDocContent(e.target.value)}
-                    placeholder="Enter the document content..."
+                    placeholder={t("bankSelector.documentDialog.contentPlaceholder")}
                     className="min-h-[150px] resize-y"
                     autoFocus
                   />
@@ -786,12 +806,14 @@ function BankSelectorInner() {
                     <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
                       <Lock className="h-12 w-12 text-muted-foreground/50" />
                       <div>
-                        <p className="font-semibold text-foreground">File Upload API Disabled</p>
+                        <p className="font-semibold text-foreground">
+                          {t("bankSelector.documentDialog.fileUploadDisabledTitle")}
+                        </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          File upload is not enabled on this server.
+                          {t("bankSelector.documentDialog.fileUploadDisabledDescription")}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          To enable, set{" "}
+                          {t("bankSelector.documentDialog.fileUploadEnablePrefix")}{" "}
                           <code className="bg-muted px-1 py-0.5 rounded">
                             HINDSIGHT_API_ENABLE_FILE_UPLOAD_API=true
                           </code>
@@ -814,7 +836,7 @@ function BankSelectorInner() {
                       >
                         <Upload className="h-8 w-8 text-muted-foreground mb-2" />
                         <span className="text-sm text-muted-foreground">
-                          Click to select files or drag and drop
+                          {t("bankSelector.documentDialog.fileDropLabel")}
                         </span>
                       </label>
 
@@ -840,7 +862,7 @@ function BankSelectorInner() {
                                     type="button"
                                     className="flex items-center gap-1.5 min-w-0 flex-1 text-left hover:opacity-75 transition-opacity"
                                     onClick={() => toggleFileExpanded(index)}
-                                    title="Edit metadata for this file"
+                                    title={t("bankSelector.documentDialog.editFileMetadata")}
                                   >
                                     {meta?.expanded ? (
                                       <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -873,13 +895,17 @@ function BankSelectorInner() {
                                       onValueChange={(v) => updateFileMeta(index, "advancedTab", v)}
                                     >
                                       <TabsList className="w-full border-b border-border bg-transparent h-8 p-0 gap-0 justify-start rounded-none">
-                                        {(["document", "tags", "source"] as const).map((t) => (
+                                        {(["document", "tags", "source"] as const).map((tab) => (
                                           <TabsTrigger
-                                            key={t}
-                                            value={t}
+                                            key={tab}
+                                            value={tab}
                                             className="rounded-none h-full px-4 text-xs font-medium bg-transparent shadow-none text-muted-foreground hover:text-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary -mb-px capitalize"
                                           >
-                                            {t}
+                                            {tab === "document"
+                                              ? t("documents.detail.document")
+                                              : tab === "tags"
+                                                ? t("common.labels.tags")
+                                                : t("bankSelector.documentDialog.source")}
                                           </TabsTrigger>
                                         ))}
                                       </TabsList>
@@ -888,7 +914,7 @@ function BankSelectorInner() {
                                           <div className="grid grid-cols-2 gap-2">
                                             <div>
                                               <label className="font-bold block mb-1 text-sm text-foreground">
-                                                Event Date
+                                                {t("documents.columns.eventDate")}
                                               </label>
                                               <Input
                                                 type="date"
@@ -901,7 +927,7 @@ function BankSelectorInner() {
                                             </div>
                                             <div>
                                               <label className="font-bold block mb-1 text-sm text-foreground">
-                                                Document ID
+                                                {t("documents.columns.documentId")}
                                               </label>
                                               <Input
                                                 value={meta.document_id}
@@ -912,14 +938,16 @@ function BankSelectorInner() {
                                                     e.target.value
                                                   )
                                                 }
-                                                placeholder="Optional ID..."
+                                                placeholder={t(
+                                                  "bankSelector.documentDialog.optionalIdPlaceholder"
+                                                )}
                                                 className="h-8 text-sm"
                                               />
                                             </div>
                                           </div>
                                           <div>
                                             <label className="font-bold block mb-1 text-sm text-foreground">
-                                              Strategy
+                                              {t("bankSelector.documentDialog.strategy")}
                                             </label>
                                             {bankStrategies.length > 0 ? (
                                               <Select
@@ -938,7 +966,7 @@ function BankSelectorInner() {
                                                 <SelectContent>
                                                   <SelectItem value="__none__">
                                                     <span className="text-muted-foreground italic">
-                                                      Default
+                                                      {t("common.states.default")}
                                                     </span>
                                                   </SelectItem>
                                                   {bankStrategies.map((name) => (
@@ -954,7 +982,9 @@ function BankSelectorInner() {
                                                 onChange={(e) =>
                                                   updateFileMeta(index, "strategy", e.target.value)
                                                 }
-                                                placeholder="Strategy name (optional)..."
+                                                placeholder={t(
+                                                  "bankSelector.documentDialog.strategyPlaceholder"
+                                                )}
                                                 className="h-8 text-sm"
                                               />
                                             )}
@@ -963,46 +993,49 @@ function BankSelectorInner() {
                                         <TabsContent value="tags" className="mt-0 space-y-2">
                                           <div>
                                             <label className="font-bold block mb-1 text-sm text-foreground">
-                                              Tags
+                                              {t("common.labels.tags")}
                                             </label>
                                             <Input
                                               value={meta.tags}
                                               onChange={(e) =>
                                                 updateFileMeta(index, "tags", e.target.value)
                                               }
-                                              placeholder="tag1, tag2..."
+                                              placeholder={t("documents.placeholders.tagsShort")}
                                               className="h-8 text-sm"
                                             />
                                             <p className="text-xs text-muted-foreground mt-1">
-                                              Comma-separated — used to filter memories during
-                                              recall/reflect
+                                              {t("bankSelector.documentDialog.tagsDescription")}
                                             </p>
                                           </div>
                                         </TabsContent>
                                         <TabsContent value="source" className="mt-0 space-y-2">
                                           <div>
                                             <label className="font-bold block mb-1 text-sm text-foreground">
-                                              Context
+                                              {t("common.labels.context")}
                                             </label>
                                             <Input
                                               value={meta.context}
                                               onChange={(e) =>
                                                 updateFileMeta(index, "context", e.target.value)
                                               }
-                                              placeholder="Optional context..."
+                                              placeholder={t(
+                                                "bankSelector.documentDialog.optionalContextPlaceholder"
+                                              )}
                                               className="h-8 text-sm"
                                             />
                                           </div>
                                           <div>
                                             <label className="font-bold block mb-1 text-sm text-foreground">
-                                              Metadata
+                                              {t("auditLogs.detail.metadata")}
                                             </label>
                                             <Textarea
                                               value={meta.metadata}
                                               onChange={(e) =>
                                                 updateFileMeta(index, "metadata", e.target.value)
                                               }
-                                              placeholder={"source: slack\nchannel: engineering"}
+                                              placeholder={t(
+                                                "bankSelector.documentDialog.metadataPlaceholder"
+                                              )}
                                               className="min-h-[52px] resize-y font-mono text-sm"
                                             />
                                           </div>
@@ -1028,12 +1061,14 @@ function BankSelectorInner() {
               {/* Context — text tab only */}
               {docTab === "text" && (
                 <div>
-                  <label className="font-bold block mb-1 text-sm text-foreground">Context</label>
+                  <label className="font-bold block mb-1 text-sm text-foreground">
+                    {t("common.labels.context")}
+                  </label>
                   <Input
                     type="text"
                     value={docContext}
                     onChange={(e) => setDocContext(e.target.value)}
-                    placeholder="Optional context about this document..."
+                    placeholder={t("bankSelector.documentDialog.documentContextPlaceholder")}
                   />
                 </div>
               )}
@@ -1050,19 +1085,19 @@ function BankSelectorInner() {
                         value="document"
                         className="rounded-none h-full px-4 text-xs font-medium bg-transparent shadow-none text-muted-foreground hover:text-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary -mb-px"
                       >
-                        Document
+                        {t("documents.detail.document")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="tags"
                         className="rounded-none h-full px-4 text-xs font-medium bg-transparent shadow-none text-muted-foreground hover:text-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary -mb-px"
                       >
-                        Tags
+                        {t("common.labels.tags")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="source"
                         className="rounded-none h-full px-4 text-xs font-medium bg-transparent shadow-none text-muted-foreground hover:text-foreground data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary -mb-px"
                       >
-                        Source
+                        {t("bankSelector.documentDialog.source")}
                       </TabsTrigger>
                     </TabsList>
 
@@ -1071,7 +1106,7 @@ function BankSelectorInner() {
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="font-bold block mb-1 text-sm text-foreground">
-                              Event Date
+                              {t("documents.columns.eventDate")}
                             </label>
                             <Input
                               type="date"
@@ -1082,19 +1117,21 @@ function BankSelectorInner() {
                           </div>
                           <div>
                             <label className="font-bold block mb-1 text-sm text-foreground">
-                              Document ID
+                              {t("documents.columns.documentId")}
                             </label>
                             <Input
                               type="text"
                               value={docDocumentId}
                               onChange={(e) => setDocDocumentId(e.target.value)}
-                              placeholder="Optional document identifier..."
+                              placeholder={t(
+                                "bankSelector.documentDialog.optionalDocumentIdPlaceholder"
+                              )}
                             />
                           </div>
                         </div>
                         <div>
                           <label className="font-bold block mb-1 text-sm text-foreground">
-                            Strategy
+                            {t("bankSelector.documentDialog.strategy")}
                           </label>
                           {bankStrategies.length > 0 ? (
                             <Select
@@ -1106,7 +1143,9 @@ function BankSelectorInner() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="__none__">
-                                  <span className="text-muted-foreground italic">Default</span>
+                                  <span className="text-muted-foreground italic">
+                                    {t("common.states.default")}
+                                  </span>
                                 </SelectItem>
                                 {bankStrategies.map((name) => (
                                   <SelectItem key={name} value={name}>
@@ -1120,11 +1159,11 @@ function BankSelectorInner() {
                               type="text"
                               value={docStrategy}
                               onChange={(e) => setDocStrategy(e.target.value)}
-                              placeholder="Strategy name (optional)..."
+                              placeholder={t("bankSelector.documentDialog.strategyPlaceholder")}
                             />
                           )}
                           <p className="text-xs text-muted-foreground mt-1">
-                            Override the bank&apos;s default extraction strategy for this document.
+                            {t("bankSelector.documentDialog.strategyDescription")}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1137,7 +1176,7 @@ function BankSelectorInner() {
                             htmlFor="async-doc"
                             className="text-sm cursor-pointer text-foreground"
                           >
-                            Process in background (async)
+                            {t("bankSelector.documentDialog.processAsync")}
                           </label>
                         </div>
                       </TabsContent>
@@ -1145,21 +1184,21 @@ function BankSelectorInner() {
                       <TabsContent value="tags" className="mt-0 space-y-3">
                         <div>
                           <label className="font-bold block mb-1 text-sm text-foreground">
-                            Tags
+                            {t("common.labels.tags")}
                           </label>
                           <Input
                             type="text"
                             value={docTags}
                             onChange={(e) => setDocTags(e.target.value)}
-                            placeholder="user_alice, session_123, project_x"
+                            placeholder={t("bankSelector.documentDialog.tagsPlaceholder")}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
-                            Comma-separated — used to filter memories during recall/reflect
+                            {t("bankSelector.documentDialog.tagsDescription")}
                           </p>
                         </div>
                         <div>
                           <label className="font-bold block mb-1 text-sm text-foreground">
-                            Observation Scopes
+                            {t("memoryDetails.observationScopes")}
                           </label>
                           <Select
                             value={docObservationScopes}
@@ -1173,10 +1212,18 @@ function BankSelectorInner() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="per_tag">Per tag</SelectItem>
-                              <SelectItem value="combined">Combined</SelectItem>
-                              <SelectItem value="all_combinations">All combinations</SelectItem>
-                              <SelectItem value="custom">Custom</SelectItem>
+                              <SelectItem value="per_tag">
+                                {t("bankSelector.observationScopes.perTag")}
+                              </SelectItem>
+                              <SelectItem value="combined">
+                                {t("bankSelector.observationScopes.combined")}
+                              </SelectItem>
+                              <SelectItem value="all_combinations">
+                                {t("bankSelector.observationScopes.allCombinations")}
+                              </SelectItem>
+                              <SelectItem value="custom">
+                                {t("bankSelector.observationScopes.custom")}
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           {docObservationScopes !== "custom" &&
@@ -1190,7 +1237,7 @@ function BankSelectorInner() {
                               if (tags.length === 0) {
                                 return (
                                   <p className="text-xs text-muted-foreground/60 mt-1.5 italic">
-                                    Add tags above to preview observation scopes
+                                    {t("bankSelector.observationScopes.previewHint")}
                                   </p>
                                 );
                               }
@@ -1208,7 +1255,9 @@ function BankSelectorInner() {
                                   ))}
                                   {scopes.length > MAX && (
                                     <li className="text-xs text-muted-foreground">
-                                      +{scopes.length - MAX} more scopes
+                                      {t("bankSelector.observationScopes.moreScopes", {
+                                        count: scopes.length - MAX,
+                                      })}
                                     </li>
                                   )}
                                 </ul>
@@ -1218,7 +1267,7 @@ function BankSelectorInner() {
                             <Textarea
                               value={docObservationScopesCustom}
                               onChange={(e) => setDocObservationScopesCustom(e.target.value)}
-                              placeholder={"user:alice\nuser:alice, place:online"}
+                              placeholder={t("bankSelector.observationScopes.customPlaceholder")}
                               className="min-h-[72px] resize-y font-mono text-sm mt-2"
                             />
                           )}
@@ -1228,30 +1277,34 @@ function BankSelectorInner() {
                       <TabsContent value="source" className="mt-0 space-y-3">
                         <div>
                           <label className="font-bold block mb-1 text-sm text-foreground">
-                            Metadata
+                            {t("auditLogs.detail.metadata")}
                           </label>
                           <Textarea
                             value={docMetadata}
                             onChange={(e) => setDocMetadata(e.target.value)}
-                            placeholder={"source: slack\nchannel: engineering"}
+                            placeholder={t("bankSelector.documentDialog.metadataPlaceholder")}
                             className="min-h-[72px] resize-y font-mono text-sm"
                           />
                           <p className="text-xs text-muted-foreground mt-1">
-                            One <code className="bg-muted px-0.5 rounded">key: value</code> per line
+                            {t("bankSelector.documentDialog.metadataFormatBefore")}{" "}
+                            <code className="bg-muted px-0.5 rounded">
+                              {t("bankSelector.documentDialog.metadataFormatExample")}
+                            </code>{" "}
+                            {t("bankSelector.documentDialog.metadataFormatAfter")}
                           </p>
                         </div>
                         <div>
                           <label className="font-bold block mb-1 text-sm text-foreground">
-                            Entities
+                            {t("navigation.entities")}
                           </label>
                           <Input
                             type="text"
                             value={docEntities}
                             onChange={(e) => setDocEntities(e.target.value)}
-                            placeholder="Alice, Google, ML model"
+                            placeholder={t("bankSelector.documentDialog.entitiesPlaceholder")}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
-                            Comma-separated hints merged with auto-extracted entities
+                            {t("bankSelector.documentDialog.entitiesDescription")}
                           </p>
                         </div>
                       </TabsContent>
@@ -1282,14 +1335,14 @@ function BankSelectorInner() {
                   setUploadProgress("");
                 }}
               >
-                Cancel
+                {t("common.actions.cancel")}
               </Button>
               {docTab === "text" ? (
                 <Button
                   onClick={handleCreateDocument}
                   disabled={isCreatingDoc || !docContent.trim()}
                 >
-                  {isCreatingDoc ? "Adding..." : "Add Document"}
+                  {isCreatingDoc ? t("common.actions.adding") : t("bankSelector.addDocument")}
                 </Button>
               ) : (
                 <Button
@@ -1297,8 +1350,10 @@ function BankSelectorInner() {
                   disabled={isCreatingDoc || selectedFiles.length === 0}
                 >
                   {isCreatingDoc
-                    ? uploadProgress || "Uploading..."
-                    : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? "s" : ""}`}
+                    ? uploadProgress || t("common.actions.uploading")
+                    : t("bankSelector.documentDialog.uploadFilesCount", {
+                        count: selectedFiles.length,
+                      })}
                 </Button>
               )}
             </DialogFooter>
@@ -1309,47 +1364,51 @@ function BankSelectorInner() {
   );
 }
 
+function BankSelectorFallback() {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-card text-card-foreground px-5 py-3 border-b-4 border-primary-gradient">
+      <div className="flex items-center gap-4 text-sm">
+        <Image
+          src="/logo.png"
+          alt="Hindsight"
+          width={40}
+          height={40}
+          className="h-10 w-auto"
+          unoptimized
+        />
+        <div className="h-8 w-px bg-border" />
+        <Button
+          variant="outline"
+          className="w-[250px] justify-between font-bold border-2 border-primary"
+          disabled
+        >
+          {t("common.loading")}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+        <div className="flex-1" />
+        <a
+          href="https://github.com/vectorize-io/hindsight"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground"
+        >
+          <Github className="h-5 w-5" />
+          <span className="text-sm font-medium">{t("common.github")}</span>
+        </a>
+        <div className="h-8 w-px bg-border" />
+        <Button variant="ghost" size="icon" className="h-9 w-9" disabled>
+          <Moon className="h-5 w-5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function BankSelector() {
   return (
-    <Suspense
-      fallback={
-        <div className="bg-card text-card-foreground px-5 py-3 border-b-4 border-primary-gradient">
-          <div className="flex items-center gap-4 text-sm">
-            <Image
-              src="/logo.png"
-              alt="Hindsight"
-              width={40}
-              height={40}
-              className="h-10 w-auto"
-              unoptimized
-            />
-            <div className="h-8 w-px bg-border" />
-            <Button
-              variant="outline"
-              className="w-[250px] justify-between font-bold border-2 border-primary"
-              disabled
-            >
-              Loading...
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-            <div className="flex-1" />
-            <a
-              href="https://github.com/vectorize-io/hindsight"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground"
-            >
-              <Github className="h-5 w-5" />
-              <span className="text-sm font-medium">GitHub</span>
-            </a>
-            <div className="h-8 w-px bg-border" />
-            <Button variant="ghost" size="icon" className="h-9 w-9" disabled>
-              <Moon className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<BankSelectorFallback />}>
       <BankSelectorInner />
     </Suspense>
   );

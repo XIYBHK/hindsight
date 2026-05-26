@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { client } from "@/lib/api";
 import { useBank } from "@/lib/bank-context";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -25,20 +26,20 @@ interface DirectiveDetailModalProps {
   onClose: () => void;
 }
 
-const formatDateTime = (dateStr: string) => {
+const formatDateTime = (dateStr: string, locale: string) => {
   const date = new Date(dateStr);
-  return `${date.toLocaleDateString("en-US", {
+  return date.toLocaleString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
-  })} at ${date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  })}`;
+  });
 };
 
 export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailModalProps) {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [directive, setDirective] = useState<Directive | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,7 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col p-6">
         <VisuallyHidden>
-          <DialogTitle>Directive Details</DialogTitle>
+          <DialogTitle>{t("bankProfile.directives.detailTitle")}</DialogTitle>
         </VisuallyHidden>
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -81,7 +82,9 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
         ) : error ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center text-destructive">
-              <div className="text-sm">Error: {error}</div>
+              <div className="text-sm">
+                {t("common.error")}: {error}
+              </div>
             </div>
           </div>
         ) : directive ? (
@@ -92,7 +95,7 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
                 <h3 className="text-xl font-bold text-foreground">{directive.name}</h3>
                 {!directive.is_active && (
                   <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium">
-                    Inactive
+                    {t("common.states.inactive")}
                   </span>
                 )}
               </div>
@@ -103,15 +106,15 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
             <div className="flex gap-8">
               <div>
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                  Created
+                  {t("operations.columns.created")}
                 </div>
                 <div className="text-sm text-foreground">
-                  {formatDateTime(directive.created_at)}
+                  {formatDateTime(directive.created_at, i18n.language)}
                 </div>
               </div>
               <div>
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                  Priority
+                  {t("bankProfile.directives.labels.priority")}
                 </div>
                 <div className="text-sm text-foreground">{directive.priority}</div>
               </div>
@@ -120,7 +123,7 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
             {/* Content */}
             <div>
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Content
+                {t("common.labels.content")}
               </div>
               <div className="prose prose-base dark:prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{directive.content}</ReactMarkdown>
@@ -131,7 +134,7 @@ export function DirectiveDetailModal({ directiveId, onClose }: DirectiveDetailMo
             {directive.tags && directive.tags.length > 0 && (
               <div>
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Tags
+                  {t("common.labels.tags")}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {directive.tags.map((tag: string, idx: number) => (

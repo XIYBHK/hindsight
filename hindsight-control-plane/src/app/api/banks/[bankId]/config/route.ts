@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lowLevelClient, sdk } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +22,13 @@ export async function GET(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error fetching bank config:", error);
-    return NextResponse.json({ error: "Failed to fetch bank config" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch bank config",
+        errorKey: "api.errors.bankConfig.fetch",
+      }),
+      { status: 500 }
+    );
   }
 }
 
@@ -48,7 +55,13 @@ export async function PATCH(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error updating bank config:", error);
-    return NextResponse.json({ error: "Failed to update bank config" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to update bank config",
+        errorKey: "api.errors.bankConfig.update",
+      }),
+      { status: 500 }
+    );
   }
 }
 
@@ -72,6 +85,12 @@ export async function DELETE(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error resetting bank config:", error);
-    return NextResponse.json({ error: "Failed to reset bank config" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to reset bank config",
+        errorKey: "api.errors.bankConfig.reset",
+      }),
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sdk, lowLevelClient } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +15,13 @@ export async function GET(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error fetching bank profile:", error);
-    return NextResponse.json({ error: "Failed to fetch bank profile" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch bank profile",
+        errorKey: "api.errors.bankProfile.fetch",
+      }),
+      { status: 500 }
+    );
   }
 }
 
@@ -34,6 +41,12 @@ export async function PUT(
     return NextResponse.json(response.data, { status: 200 });
   } catch (error) {
     console.error("Error updating bank profile:", error);
-    return NextResponse.json({ error: "Failed to update bank profile" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to update bank profile",
+        errorKey: "api.errors.bankProfile.update",
+      }),
+      { status: 500 }
+    );
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useBank } from "@/lib/bank-context";
 import { useFeatures } from "@/lib/features-context";
 import { client, MentalModel } from "@/lib/api";
@@ -74,10 +75,19 @@ type Period = "1h" | "12h" | "1d" | "7d" | "30d" | "90d";
 const PERIODS: Period[] = ["1h", "12h", "1d", "7d", "30d", "90d"];
 
 type TimeField = "created_at" | "mentioned_at" | "occurred_start";
-const TIME_FIELD_LABELS: Record<TimeField, { short: string; long: string }> = {
-  created_at: { short: "Ingested", long: "When records were ingested" },
-  mentioned_at: { short: "Mentioned", long: "When facts were mentioned (event time)" },
-  occurred_start: { short: "Occurred", long: "When the underlying event started" },
+const TIME_FIELD_LABELS: Record<TimeField, { shortKey: string; longKey: string }> = {
+  created_at: {
+    shortKey: "bankStats.timeFields.ingested.short",
+    longKey: "bankStats.timeFields.ingested.long",
+  },
+  mentioned_at: {
+    shortKey: "bankStats.timeFields.mentioned.short",
+    longKey: "bankStats.timeFields.mentioned.long",
+  },
+  occurred_start: {
+    shortKey: "bankStats.timeFields.occurred.short",
+    longKey: "bankStats.timeFields.occurred.long",
+  },
 };
 const TIME_FIELDS: TimeField[] = ["created_at", "mentioned_at", "occurred_start"];
 
@@ -114,10 +124,10 @@ const CHART_COLORS = {
   border: "var(--border)",
 };
 
-const FACT_META: Record<FactKey, { label: string; color: string }> = {
-  world: { label: "World", color: CHART_COLORS.world },
-  experience: { label: "Experience", color: CHART_COLORS.experience },
-  observation: { label: "Observations", color: CHART_COLORS.observation },
+const FACT_META: Record<FactKey, { labelKey: string; color: string }> = {
+  world: { labelKey: "factTypes.world", color: CHART_COLORS.world },
+  experience: { labelKey: "factTypes.experience", color: CHART_COLORS.experience },
+  observation: { labelKey: "factTypes.observation", color: CHART_COLORS.observation },
 };
 
 function formatCompact(n: number): string {
@@ -135,8 +145,9 @@ function formatCompact(n: number): string {
 }
 
 function CompactNumber({ value, className }: { value: number; className?: string }) {
+  const { i18n } = useTranslation();
   return (
-    <span className={className} title={value.toLocaleString()}>
+    <span className={className} title={value.toLocaleString(i18n.language)}>
       {formatCompact(value)}
     </span>
   );
@@ -150,6 +161,7 @@ type ChartTooltipProps = Partial<TooltipContentProps<number, string>> & {
 };
 
 function ChartTooltip({ active, payload, label, valueLabel }: ChartTooltipProps) {
+  const { t, i18n } = useTranslation();
   if (!active || !payload || payload.length === 0) return null;
   return (
     <div className="rounded-lg border border-border/60 bg-popover/95 backdrop-blur-sm px-3 py-2 shadow-md">
@@ -163,9 +175,11 @@ function ChartTooltip({ active, payload, label, valueLabel }: ChartTooltipProps)
               className="w-2 h-2 rounded-[2px]"
               style={{ backgroundColor: p.color || (p.payload as { fill?: string })?.fill }}
             />
-            <span className="text-muted-foreground">{p.name || valueLabel || "Value"}</span>
+            <span className="text-muted-foreground">
+              {p.name || valueLabel || t("bankStats.value")}
+            </span>
             <span className="ml-auto pl-3 font-semibold tabular-nums text-foreground">
-              {(p.value ?? 0).toLocaleString()}
+              {(p.value ?? 0).toLocaleString(i18n.language)}
             </span>
           </div>
         ))}
@@ -215,16 +229,17 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
-function formatRelativeTime(ts: string | null): string {
-  if (!ts) return "Never";
+function formatRelativeTime(ts: string | null, locale: string, neverLabel: string): string {
+  if (!ts) return neverLabel;
   const diff = Date.now() - new Date(ts).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (mins < 1) return formatter.format(0, "second");
+  if (mins < 60) return formatter.format(-mins, "minute");
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return formatter.format(-hours, "hour");
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return formatter.format(-days, "day");
 }
 
 // Bucket timestamps arrive from the memories-timeseries endpoint, which is
@@ -236,20 +251,20 @@ function parseBucketIso(iso: string): Date {
   return new Date(/[+Z-]$/.test(iso) || /[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}Z`);
 }
 
-function formatBucketLabel(iso: string, trunc: string): string {
+function formatBucketLabel(iso: string, trunc: string, locale: string): string {
   const d = parseBucketIso(iso);
   if (trunc === "day") {
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
   }
-  return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 
-function formatBucketTooltip(iso: string, trunc: string): string {
+function formatBucketTooltip(iso: string, trunc: string, locale: string): string {
   const d = parseBucketIso(iso);
   if (trunc === "day") {
-    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    return d.toLocaleDateString(locale, { weekday: "short", month: "short", day: "numeric" });
   }
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(locale, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -267,6 +282,7 @@ function ProgressRow({
   total: number;
   doneColor: string;
 }) {
+  const { i18n } = useTranslation();
   const ratio = total > 0 ? done / total : 0;
   const percent = Math.round(ratio * 100);
   return (
@@ -274,9 +290,9 @@ function ProgressRow({
       <div className="flex items-baseline justify-between">
         <span className="text-xs text-muted-foreground">
           <span className="tabular-nums font-semibold text-foreground text-sm">
-            {done.toLocaleString()}
+            {done.toLocaleString(i18n.language)}
           </span>
-          <span className="text-muted-foreground"> / {total.toLocaleString()}</span>
+          <span className="text-muted-foreground"> / {total.toLocaleString(i18n.language)}</span>
         </span>
         <span className="text-xs font-semibold tabular-nums text-foreground">{percent}%</span>
       </div>
@@ -305,6 +321,7 @@ function Distribution({
   items: DistributionItem[];
   emptyLabel: string;
 }) {
+  const { i18n } = useTranslation();
   const total = items.reduce((s, i) => s + i.value, 0);
   return (
     <div className="space-y-3">
@@ -329,7 +346,7 @@ function Distribution({
                     width: `${(d.value / total) * 100}%`,
                     backgroundColor: d.color,
                   }}
-                  title={`${d.name}: ${d.value.toLocaleString()}`}
+                  title={`${d.name}: ${d.value.toLocaleString(i18n.language)}`}
                 />
               ))}
           </div>
@@ -390,13 +407,6 @@ const OPS_STATUS_COLORS: Record<string, string> = {
   failed: "#ef4444", // red-500
   cancelled: "#6b7280", // gray-500
 };
-const OPS_STATUS_LABELS: Record<string, string> = {
-  completed: "completed",
-  processing: "processing",
-  pending: "pending",
-  failed: "failed",
-  cancelled: "cancelled",
-};
 
 interface OpsStatusEntry {
   status: string;
@@ -406,9 +416,10 @@ interface OpsStatusEntry {
 }
 
 function OperationsCard({ byStatus }: { byStatus: Record<string, number> }) {
+  const { t, i18n } = useTranslation();
   const entries: OpsStatusEntry[] = OPS_STATUS_ORDER.map((s) => ({
     status: s,
-    label: OPS_STATUS_LABELS[s],
+    label: t(`operationStatuses.${s}`),
     value: byStatus[s] || 0,
     color: OPS_STATUS_COLORS[s],
   }));
@@ -425,16 +436,16 @@ function OperationsCard({ byStatus }: { byStatus: Record<string, number> }) {
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-muted-foreground" />
-          Operations
+          {t("operations.title")}
         </CardTitle>
         <span className="text-xs text-muted-foreground tabular-nums">
-          <CompactNumber value={total} /> total
+          {t("bankStats.totalWithCount", { count: total })}
         </span>
       </CardHeader>
       <CardContent>
         {total === 0 ? (
           <div className="h-[100px] flex items-center justify-center text-sm text-muted-foreground">
-            No operations yet
+            {t("operations.empty.all")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -447,7 +458,7 @@ function OperationsCard({ byStatus }: { byStatus: Record<string, number> }) {
                     width: `${(e.value / total) * 100}%`,
                     backgroundColor: e.color,
                   }}
-                  title={`${e.label}: ${e.value.toLocaleString()}`}
+                  title={`${e.label}: ${e.value.toLocaleString(i18n.language)}`}
                 />
               ))}
             </div>
@@ -489,13 +500,16 @@ function ConsolidationCard({
   total: number;
   lastConsolidatedAt: string | null;
 }) {
+  const { t, i18n } = useTranslation();
   const [failedOpen, setFailedOpen] = useState(false);
   const hasFailed = failed > 0;
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold">Consolidation</CardTitle>
+        <CardTitle className="text-sm font-semibold">
+          {t("bankStats.consolidation.title")}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <ProgressRow done={done} total={total} doneColor={CHART_COLORS.success} />
@@ -504,7 +518,7 @@ function ConsolidationCard({
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3 h-3 text-emerald-500" />
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                Done
+                {t("bankStats.consolidation.done")}
               </span>
             </div>
             <CompactNumber
@@ -516,7 +530,7 @@ function ConsolidationCard({
             <div className="flex items-center gap-1.5">
               <AlertCircle className="w-3 h-3 text-amber-500" />
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                Pending
+                {t("operationStatuses.pending")}
               </span>
             </div>
             <CompactNumber
@@ -533,7 +547,7 @@ function ConsolidationCard({
                 ? "cursor-pointer hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40"
                 : "cursor-default"
             }`}
-            title={hasFailed ? "View failed memories" : undefined}
+            title={hasFailed ? t("bankStats.consolidation.viewFailedMemories") : undefined}
           >
             <div className="flex items-center gap-1.5">
               <XCircle
@@ -546,7 +560,7 @@ function ConsolidationCard({
                   hasFailed ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
                 }`}
               >
-                Failed
+                {t("operationStatuses.failed")}
               </span>
             </div>
             <span
@@ -562,11 +576,11 @@ function ConsolidationCard({
             <div className="flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                Last
+                {t("bankStats.consolidation.last")}
               </span>
             </div>
             <span className="text-base font-semibold text-foreground block leading-tight">
-              {formatRelativeTime(lastConsolidatedAt)}
+              {formatRelativeTime(lastConsolidatedAt, i18n.language, t("bankStats.never"))}
             </span>
           </div>
         </div>
@@ -591,6 +605,7 @@ function FailedConsolidationsDialog({
   open: boolean;
   onOpenChange: (value: boolean) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [items, setItems] = useState<FailedMemoryItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -630,7 +645,7 @@ function FailedConsolidationsDialog({
         await client.triggerConsolidation(currentBank);
       }
       toast.success(
-        `Queued ${res.retried_count} memor${res.retried_count === 1 ? "y" : "ies"} for re-consolidation`
+        t("bankStats.failedConsolidations.recoverQueued", { count: res.retried_count })
       );
       setRefreshTick((t) => t + 1);
     } catch {
@@ -646,45 +661,52 @@ function FailedConsolidationsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-            Failed consolidations
+            {t("bankStats.failedConsolidations.title")}
           </DialogTitle>
-          <DialogDescription>
-            Source memories whose consolidation permanently failed. Recovery resets them so they are
-            retried on the next consolidation run.
-          </DialogDescription>
+          <DialogDescription>{t("bankStats.failedConsolidations.description")}</DialogDescription>
         </DialogHeader>
         <div className="flex items-center justify-between gap-2 py-2">
           <span className="text-sm text-muted-foreground">
-            {loading ? "Loading…" : `${total} failed`}
+            {loading
+              ? t("common.loading")
+              : t("bankStats.failedConsolidations.failedCount", { count: total })}
           </span>
           <Button size="sm" onClick={handleRecover} disabled={recovering || loading || total === 0}>
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${recovering ? "animate-spin" : ""}`} />
-            Recover all
+            {t("bankStats.failedConsolidations.recoverAll")}
           </Button>
         </div>
         <div className="flex-1 min-h-0 overflow-auto border border-border rounded-md">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[140px]">Failed at</TableHead>
-                <TableHead className="w-[100px]">Type</TableHead>
-                <TableHead>Text</TableHead>
+                <TableHead className="w-[140px]">
+                  {t("bankStats.failedConsolidations.columns.failedAt")}
+                </TableHead>
+                <TableHead className="w-[100px]">{t("operations.columns.type")}</TableHead>
+                <TableHead>{t("common.labels.text")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.length === 0 && !loading && (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                    No failed consolidations.
+                    {t("bankStats.failedConsolidations.empty")}
                   </TableCell>
                 </TableRow>
               )}
               {items.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatRelativeTime(row.consolidation_failed_at)}
+                    {formatRelativeTime(
+                      row.consolidation_failed_at,
+                      i18n.language,
+                      t("bankStats.never")
+                    )}
                   </TableCell>
-                  <TableCell className="text-xs capitalize">{row.fact_type}</TableCell>
+                  <TableCell className="text-xs">
+                    {t(`factTypes.${row.fact_type}`, { defaultValue: row.fact_type })}
+                  </TableCell>
                   <TableCell className="text-sm">
                     <div className="line-clamp-2">{row.text}</div>
                     {row.context && (
@@ -710,6 +732,7 @@ function MentalModelsCard({
   models: MentalModel[];
   lastConsolidatedAt: string | null;
 }) {
+  const { t } = useTranslation();
   const total = models.length;
   const consolidatedTime = lastConsolidatedAt ? new Date(lastConsolidatedAt).getTime() : 0;
   const upToDate = models.filter((m) => {
@@ -724,12 +747,12 @@ function MentalModelsCard({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <Brain className="w-3.5 h-3.5 text-muted-foreground" />
-          Mental Models
+          {t("dataTabs.mentalModels")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {total === 0 ? (
-          <div className="text-sm text-muted-foreground py-4">No mental models</div>
+          <div className="text-sm text-muted-foreground py-4">{t("mentalModels.empty.short")}</div>
         ) : (
           <>
             <ProgressRow done={upToDate} total={total} doneColor={CHART_COLORS.success} />
@@ -738,7 +761,7 @@ function MentalModelsCard({
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Up to date
+                    {t("bankStats.mentalModels.upToDate")}
                   </span>
                 </div>
                 <span className="text-base font-semibold tabular-nums text-foreground block">
@@ -749,7 +772,7 @@ function MentalModelsCard({
                 <div className="flex items-center gap-1.5">
                   <AlertCircle className="w-3 h-3 text-amber-500" />
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Stale
+                    {t("bankStats.mentalModels.stale")}
                   </span>
                 </div>
                 <span className="text-base font-semibold tabular-nums text-foreground block">
@@ -760,7 +783,7 @@ function MentalModelsCard({
                 <div className="flex items-center gap-1.5">
                   <Brain className="w-3 h-3 text-muted-foreground" />
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                    Total
+                    {t("bankStats.total")}
                   </span>
                 </div>
                 <span className="text-base font-semibold tabular-nums text-foreground block">
@@ -782,6 +805,7 @@ const AXIS_TICK_STYLE = {
 };
 
 export function BankStatsView() {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const { features } = useFeatures();
   const observationsEnabled = features?.observations ?? false;
@@ -860,8 +884,8 @@ export function BankStatsView() {
 
   const chartData = timeseries.buckets.map((b) => ({
     ...b,
-    label: formatBucketLabel(b.time, timeseries.trunc),
-    tooltipLabel: formatBucketTooltip(b.time, timeseries.trunc),
+    label: formatBucketLabel(b.time, timeseries.trunc, i18n.language),
+    tooltipLabel: formatBucketTooltip(b.time, timeseries.trunc, i18n.language),
   }));
   const ingestedTotal = chartData.reduce(
     (sum, b) => sum + factSeries.reduce((s, k) => s + (enabledSeries[k] ? b[k] || 0 : 0), 0),
@@ -876,66 +900,74 @@ export function BankStatsView() {
     <div className="space-y-8">
       {/* MEMORY STORE — unified card: top stat strip + composition + link types */}
       <section>
-        <SectionHeading>Memory store</SectionHeading>
+        <SectionHeading>{t("bankStats.memoryStore")}</SectionHeading>
         <Card>
           <CardContent className="p-0">
             {/* Stat strip */}
             <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-y md:divide-y-0 divide-border/60">
-              <InlineStat icon={Database} label="Memories" value={stats.total_nodes} />
-              <InlineStat icon={FolderOpen} label="Documents" value={stats.total_documents} />
-              <InlineStat icon={Link2} label="Links" value={stats.total_links} />
+              <InlineStat
+                icon={Database}
+                label={t("bankStats.memories")}
+                value={stats.total_nodes}
+              />
+              <InlineStat
+                icon={FolderOpen}
+                label={t("navigation.documents")}
+                value={stats.total_documents}
+              />
+              <InlineStat icon={Link2} label={t("bankStats.links")} value={stats.total_links} />
             </div>
 
             {/* Composition + Link types side by side */}
             <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-y md:divide-y-0 divide-border/60 border-t border-border/60">
               <div className="p-5">
                 <Distribution
-                  title="Memory composition"
+                  title={t("bankStats.memoryComposition")}
                   items={[
                     {
-                      name: "World",
+                      name: t("factTypes.world"),
                       value: stats.nodes_by_fact_type?.world || 0,
                       color: CHART_COLORS.world,
                     },
                     {
-                      name: "Experience",
+                      name: t("factTypes.experience"),
                       value: stats.nodes_by_fact_type?.experience || 0,
                       color: CHART_COLORS.experience,
                     },
                     ...(observationsEnabled
                       ? [
                           {
-                            name: "Observations",
+                            name: t("factTypes.observation"),
                             value: stats.total_observations || 0,
                             color: CHART_COLORS.observation,
                           },
                         ]
                       : []),
                   ]}
-                  emptyLabel="No memories yet"
+                  emptyLabel={t("bankStats.empty.noMemories")}
                 />
               </div>
               <div className="p-5">
                 <Distribution
-                  title="Link types"
+                  title={t("bankStats.linkTypes")}
                   items={[
                     {
-                      name: "Temporal",
+                      name: t("bankStats.linkTypeLabels.temporal"),
                       value: stats.links_by_link_type?.temporal || 0,
                       color: CHART_COLORS.temporal,
                     },
                     {
-                      name: "Semantic",
+                      name: t("bankStats.linkTypeLabels.semantic"),
                       value: stats.links_by_link_type?.semantic || 0,
                       color: CHART_COLORS.semantic,
                     },
                     {
-                      name: "Entity",
+                      name: t("bankStats.linkTypeLabels.entity"),
                       value: stats.links_by_link_type?.entity || 0,
                       color: CHART_COLORS.entity,
                     },
                   ]}
-                  emptyLabel="No links yet"
+                  emptyLabel={t("bankStats.empty.noLinks")}
                 />
               </div>
             </div>
@@ -945,7 +977,7 @@ export function BankStatsView() {
 
       {/* CONSOLIDATION */}
       <section>
-        <SectionHeading>Consolidation</SectionHeading>
+        <SectionHeading>{t("bankStats.consolidation.title")}</SectionHeading>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ConsolidationCard
             done={consolidatedDone}
@@ -960,13 +992,15 @@ export function BankStatsView() {
 
       {/* ACTIVITY */}
       <section>
-        <SectionHeading>Activity</SectionHeading>
+        <SectionHeading>{t("bankStats.activity")}</SectionHeading>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="lg:col-span-2">
             <CardHeader className="pb-2 space-y-2">
               <div className="flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-semibold">
-                  Memories by {TIME_FIELD_LABELS[timeField].short.toLowerCase()} time
+                  {t("bankStats.activityTitle", {
+                    field: t(TIME_FIELD_LABELS[timeField].shortKey).toLowerCase(),
+                  })}
                 </CardTitle>
                 <div className="flex items-center gap-0.5 rounded-md bg-muted/60 p-0.5">
                   {PERIODS.map((p) => (
@@ -979,7 +1013,7 @@ export function BankStatsView() {
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {p}
+                      {t(`bankStats.periods.${p}`, { defaultValue: p })}
                     </button>
                   ))}
                 </div>
@@ -989,14 +1023,14 @@ export function BankStatsView() {
                   <button
                     key={tf}
                     onClick={() => setTimeField(tf)}
-                    title={TIME_FIELD_LABELS[tf].long}
+                    title={t(TIME_FIELD_LABELS[tf].longKey)}
                     className={`px-2 py-0.5 text-[11px] font-medium rounded transition-colors ${
                       timeField === tf
                         ? "bg-background text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {TIME_FIELD_LABELS[tf].short}
+                    {t(TIME_FIELD_LABELS[tf].shortKey)}
                   </button>
                 ))}
               </div>
@@ -1022,20 +1056,20 @@ export function BankStatsView() {
                             opacity: on ? 1 : 0.3,
                           }}
                         />
-                        {meta.label}
+                        {t(meta.labelKey)}
                       </button>
                     );
                   })}
                 </div>
                 <span className="text-xs text-muted-foreground tabular-nums">
-                  <CompactNumber value={ingestedTotal} /> total
+                  {t("bankStats.totalWithCount", { count: ingestedTotal })}
                 </span>
               </div>
             </CardHeader>
             <CardContent>
               {chartData.length === 0 || ingestedTotal === 0 ? (
                 <div className="h-[180px] flex items-center justify-center text-sm text-muted-foreground">
-                  No memories ingested in this period
+                  {t("bankStats.empty.noActivity")}
                 </div>
               ) : (
                 <div className="h-[180px]">
@@ -1086,7 +1120,7 @@ export function BankStatsView() {
                             key={k}
                             type="monotone"
                             dataKey={k}
-                            name={FACT_META[k].label}
+                            name={t(FACT_META[k].labelKey)}
                             stackId="a"
                             stroke={FACT_META[k].color}
                             strokeWidth={2}

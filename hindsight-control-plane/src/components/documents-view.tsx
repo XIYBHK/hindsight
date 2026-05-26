@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { client } from "@/lib/api";
 import { useBank } from "@/lib/bank-context";
 import { DataView } from "./data-view";
@@ -54,20 +55,21 @@ import {
 
 const ITEMS_PER_PAGE = 50;
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, locale: string): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
   const seconds = Math.floor((now - then) / 1000);
-  if (seconds < 60) return "just now";
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (seconds < 60) return formatter.format(0, "second");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return formatter.format(-minutes, "minute");
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return formatter.format(-hours, "hour");
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return formatter.format(-days, "day");
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
+  if (months < 12) return formatter.format(-months, "month");
+  return formatter.format(-Math.floor(months / 12), "year");
 }
 
 function formatBytes(bytes: number): string {
@@ -146,24 +148,35 @@ function MemoryComposition({
 }: {
   nodesByFactType: { world: number; experience: number; observation: number } | undefined;
 }) {
+  const { t, i18n } = useTranslation();
   const counts = nodesByFactType ?? { world: 0, experience: 0, observation: 0 };
   const total = counts.world + counts.experience + counts.observation;
   const items = [
-    { name: "World", value: counts.world, color: COMPOSITION_COLORS.world },
-    { name: "Experience", value: counts.experience, color: COMPOSITION_COLORS.experience },
-    { name: "Observations", value: counts.observation, color: COMPOSITION_COLORS.observation },
+    { name: t("factTypes.world"), value: counts.world, color: COMPOSITION_COLORS.world },
+    {
+      name: t("factTypes.experience"),
+      value: counts.experience,
+      color: COMPOSITION_COLORS.experience,
+    },
+    {
+      name: t("factTypes.observation"),
+      value: counts.observation,
+      color: COMPOSITION_COLORS.observation,
+    },
   ];
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">
-          Memory composition
+          {t("bankStats.memoryComposition")}
         </h4>
-        <span className="text-xs text-muted-foreground tabular-nums">{total.toLocaleString()}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {total.toLocaleString(i18n.language)}
+        </span>
       </div>
       {total === 0 ? (
-        <div className="text-xs text-muted-foreground py-2">No memories yet</div>
+        <div className="text-xs text-muted-foreground py-2">{t("bankStats.empty.noMemories")}</div>
       ) : (
         <>
           <div className="h-1.5 flex w-full rounded-full overflow-hidden bg-muted">
@@ -174,7 +187,7 @@ function MemoryComposition({
                   key={d.name}
                   className="h-full"
                   style={{ width: `${(d.value / total) * 100}%`, backgroundColor: d.color }}
-                  title={`${d.name}: ${d.value.toLocaleString()}`}
+                  title={`${d.name}: ${d.value.toLocaleString(i18n.language)}`}
                 />
               ))}
           </div>
@@ -189,7 +202,7 @@ function MemoryComposition({
                 </div>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-base font-semibold tabular-nums">
-                    {d.value.toLocaleString()}
+                    {d.value.toLocaleString(i18n.language)}
                   </span>
                   <span className="text-[10px] text-muted-foreground tabular-nums">
                     {total > 0 ? `${((d.value / total) * 100).toFixed(0)}%` : "0%"}
@@ -213,6 +226,7 @@ function ChunkMemoriesHeader({
   chunkFactType: ChunkFactType;
   setChunkFactType: (ft: ChunkFactType) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border bg-muted/30">
       {(["world", "experience", "observation"] as const).map((ft) => (
@@ -225,7 +239,7 @@ function ChunkMemoriesHeader({
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {ft === "observation" ? "Obs" : ft.charAt(0).toUpperCase() + ft.slice(1)}
+          {ft === "observation" ? t("documents.chunks.factTabs.observation") : t(`factTypes.${ft}`)}
         </button>
       ))}
     </div>
@@ -233,6 +247,7 @@ function ChunkMemoriesHeader({
 }
 
 function ChunkRow({ chunk }: { chunk: any }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [memoriesExpanded, setMemoriesExpanded] = useState(false);
   const [chunkFactType, setChunkFactType] = useState<ChunkFactType>("world");
@@ -253,7 +268,7 @@ function ChunkRow({ chunk }: { chunk: any }) {
           #{chunk.chunk_index}
         </span>
         <span className="text-[11px] text-muted-foreground/60 shrink-0">
-          {text.length.toLocaleString()} chars
+          {t("documents.detail.charactersShort", { count: text.length })}
         </span>
         {!expanded && <span className="text-xs text-foreground/50 truncate">{preview}</span>}
       </button>
@@ -274,7 +289,7 @@ function ChunkRow({ chunk }: { chunk: any }) {
                 className="h-6 px-2 text-xs gap-1"
               >
                 <Eye className="w-3 h-3" />
-                Compact
+                {t("common.actions.compact")}
               </Button>
             </div>
             <div className="flex-1 min-h-0">
@@ -315,6 +330,7 @@ function ChunkRow({ chunk }: { chunk: any }) {
 }
 
 export function DocumentsView() {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -442,12 +458,12 @@ export function DocumentsView() {
       const result = await client.reprocessDocument(selectedDocument.id, currentBank);
       setReprocessResult({
         success: true,
-        message: `Reprocessing started (operation: ${result.operation_id})`,
+        message: t("documents.reprocess.started", { operationId: result.operation_id }),
       });
     } catch (error) {
       setReprocessResult({
         success: false,
-        message: "Error reprocessing document: " + (error as Error).message,
+        message: t("documents.reprocess.error", { error: (error as Error).message }),
       });
     } finally {
       setReprocessing(false);
@@ -465,7 +481,7 @@ export function DocumentsView() {
       const result = await client.deleteDocument(documentId, currentBank);
       setDeleteResult({
         success: true,
-        message: `Deleted document and ${result.memory_units_deleted} memory units.`,
+        message: t("documents.delete.deleted", { count: result.memory_units_deleted }),
       });
 
       // Close panel if this document was selected
@@ -479,7 +495,7 @@ export function DocumentsView() {
       console.error("Error deleting document:", error);
       setDeleteResult({
         success: false,
-        message: "Error deleting document: " + (error as Error).message,
+        message: t("documents.delete.error", { error: (error as Error).message }),
       });
     } finally {
       setDeletingDocumentId(null);
@@ -602,13 +618,13 @@ export function DocumentsView() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="text-4xl mb-2">⏳</div>
-            <div className="text-sm text-muted-foreground">Loading documents...</div>
+            <div className="text-sm text-muted-foreground">{t("documents.loading")}</div>
           </div>
         </div>
       ) : documents.length > 0 ? (
         <>
           <div className="mb-4 text-sm text-muted-foreground">
-            {total} {total === 1 ? "document" : "documents"}
+            {t("documents.count", { count: total })}
           </div>
           {/* Documents Table */}
           <div className="w-full">
@@ -617,7 +633,7 @@ export function DocumentsView() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search documents (ID)..."
+                placeholder={t("documents.searchPlaceholder")}
                 className="max-w-2xl"
               />
             </div>
@@ -626,13 +642,13 @@ export function DocumentsView() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Document ID</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Updated</TableHead>
-                    <TableHead>Tags</TableHead>
-                    <TableHead>Metadata</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Memory Units</TableHead>
+                    <TableHead>{t("documents.columns.documentId")}</TableHead>
+                    <TableHead>{t("operations.columns.created")}</TableHead>
+                    <TableHead>{t("operations.columns.updated")}</TableHead>
+                    <TableHead>{t("common.labels.tags")}</TableHead>
+                    <TableHead>{t("auditLogs.detail.metadata")}</TableHead>
+                    <TableHead>{t("documents.columns.size")}</TableHead>
+                    <TableHead>{t("documents.columns.memoryUnits")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -648,15 +664,27 @@ export function DocumentsView() {
                         </TableCell>
                         <TableCell
                           className="text-card-foreground"
-                          title={doc.created_at ? new Date(doc.created_at).toLocaleString() : ""}
+                          title={
+                            doc.created_at
+                              ? new Date(doc.created_at).toLocaleString(i18n.language)
+                              : ""
+                          }
                         >
-                          {doc.created_at ? formatRelativeTime(doc.created_at) : "N/A"}
+                          {doc.created_at
+                            ? formatRelativeTime(doc.created_at, i18n.language)
+                            : t("entities.notAvailable")}
                         </TableCell>
                         <TableCell
                           className="text-card-foreground"
-                          title={doc.updated_at ? new Date(doc.updated_at).toLocaleString() : ""}
+                          title={
+                            doc.updated_at
+                              ? new Date(doc.updated_at).toLocaleString(i18n.language)
+                              : ""
+                          }
                         >
-                          {doc.updated_at ? formatRelativeTime(doc.updated_at) : "N/A"}
+                          {doc.updated_at
+                            ? formatRelativeTime(doc.updated_at, i18n.language)
+                            : t("entities.notAvailable")}
                         </TableCell>
                         <TableCell className="text-card-foreground">
                           {doc.tags && doc.tags.length > 0 ? (
@@ -698,7 +726,7 @@ export function DocumentsView() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center">
-                        Click "Load Documents" to view data
+                        {t("documents.loadPrompt")}
                       </TableCell>
                     </TableRow>
                   )}
@@ -710,7 +738,11 @@ export function DocumentsView() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-3 pt-3 border-t px-5">
                 <div className="text-xs text-muted-foreground">
-                  {offset + 1}-{Math.min(offset + ITEMS_PER_PAGE, total)} of {total}
+                  {t("entities.paginationRange", {
+                    start: offset + 1,
+                    end: Math.min(offset + ITEMS_PER_PAGE, total),
+                    total,
+                  })}
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
@@ -761,7 +793,7 @@ export function DocumentsView() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="text-4xl mb-2">📄</div>
-            <div className="text-sm text-muted-foreground">No documents found</div>
+            <div className="text-sm text-muted-foreground">{t("documents.empty")}</div>
           </div>
         </div>
       )}
@@ -772,7 +804,7 @@ export function DocumentsView() {
           <DialogHeader className="pr-10">
             <DialogTitle className="flex items-center gap-2">
               <span className="truncate font-mono text-sm">
-                {selectedDocument?.id ?? "Document"}
+                {selectedDocument?.id ?? t("documents.detail.document")}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -781,7 +813,9 @@ export function DocumentsView() {
             <div className="flex items-center justify-center flex-1">
               <div className="text-center">
                 <div className="text-4xl mb-2">⏳</div>
-                <div className="text-sm text-muted-foreground">Loading document...</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("documents.detail.loadingDocument")}
+                </div>
               </div>
             </div>
           ) : selectedDocument ? (
@@ -790,11 +824,11 @@ export function DocumentsView() {
                 <TabsList className="grid grid-cols-3 w-full max-w-md">
                   <TabsTrigger value="general" className="flex items-center gap-1.5">
                     <Settings className="w-3.5 h-3.5" />
-                    General
+                    {t("mentalModels.tabs.general")}
                   </TabsTrigger>
                   <TabsTrigger value="content" className="flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5" />
-                    Content
+                    {t("common.labels.content")}
                   </TabsTrigger>
                   <TabsTrigger
                     value="chunks"
@@ -806,7 +840,8 @@ export function DocumentsView() {
                     }}
                   >
                     <Layers className="w-3.5 h-3.5" />
-                    Chunks{chunksLoaded ? ` (${chunksTotal})` : ""}
+                    {t("documents.detail.chunks")}
+                    {chunksLoaded ? ` (${chunksTotal})` : ""}
                   </TabsTrigger>
                 </TabsList>
                 <DropdownMenu>
@@ -816,7 +851,7 @@ export function DocumentsView() {
                       size="sm"
                       className="h-8 w-8 p-0 shrink-0"
                       disabled={reprocessing}
-                      aria-label="Actions"
+                      aria-label={t("common.actions.actions")}
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -824,7 +859,7 @@ export function DocumentsView() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={reprocessDocument} disabled={reprocessing}>
                       <RefreshCw className="h-4 w-4 mr-2" />
-                      Reprocess
+                      {t("documents.actions.reprocess")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -837,7 +872,7 @@ export function DocumentsView() {
                       className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400 focus:bg-red-500/10"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {t("common.actions.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -862,7 +897,7 @@ export function DocumentsView() {
                               ) : (
                                 <Check className="h-3 w-3" />
                               )}
-                              Save
+                              {t("common.actions.save")}
                             </Button>
                             <Button
                               variant="outline"
@@ -872,7 +907,7 @@ export function DocumentsView() {
                               className="h-7 px-3 gap-1 text-xs"
                             >
                               <X className="h-3 w-3" />
-                              Cancel
+                              {t("common.actions.cancel")}
                             </Button>
                           </div>
                         </div>
@@ -883,8 +918,7 @@ export function DocumentsView() {
                           autoFocus
                         />
                         <p className="text-xs text-muted-foreground">
-                          Saving will re-ingest this document via retain (upsert). Existing memory
-                          units for this document will be replaced.
+                          {t("documents.editContent.warning")}
                         </p>
                       </div>
                     ) : (
@@ -893,11 +927,13 @@ export function DocumentsView() {
                           <div className="flex items-center gap-1.5">
                             <FileText className="w-3.5 h-3.5" />
                             <span className="font-semibold uppercase tracking-wide">
-                              Stored content
+                              {t("documents.detail.storedContent")}
                             </span>
                             <span className="text-muted-foreground/70">
                               &middot;{" "}
-                              {selectedDocument.original_text?.length?.toLocaleString() ?? 0} chars
+                              {t("documents.detail.charactersShort", {
+                                count: selectedDocument.original_text?.length ?? 0,
+                              })}
                             </span>
                           </div>
                           <Button
@@ -907,7 +943,7 @@ export function DocumentsView() {
                             className="h-6 px-2 gap-1 text-xs"
                           >
                             <Pencil className="h-3 w-3" />
-                            Edit
+                            {t("common.actions.edit")}
                           </Button>
                         </div>
                         <pre className="p-4 text-[11px] leading-5 text-foreground/80 whitespace-pre-wrap font-mono">
@@ -923,9 +959,9 @@ export function DocumentsView() {
                     {/* Memories constellation — first */}
                     <Tabs defaultValue="world" className="flex flex-col">
                       <TabsList className="w-fit">
-                        <TabsTrigger value="world">World</TabsTrigger>
-                        <TabsTrigger value="experience">Experience</TabsTrigger>
-                        <TabsTrigger value="observation">Observations</TabsTrigger>
+                        <TabsTrigger value="world">{t("factTypes.world")}</TabsTrigger>
+                        <TabsTrigger value="experience">{t("factTypes.experience")}</TabsTrigger>
+                        <TabsTrigger value="observation">{t("factTypes.observation")}</TabsTrigger>
                       </TabsList>
                       <div className="mt-2">
                         <TabsContent value="world" className="mt-0">
@@ -950,34 +986,41 @@ export function DocumentsView() {
 
                     {/* Info cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <InfoCard title="Document" icon={<FileText className="w-3.5 h-3.5" />}>
+                      <InfoCard
+                        title={t("documents.detail.document")}
+                        icon={<FileText className="w-3.5 h-3.5" />}
+                      >
                         {selectedDocument.created_at && (
                           <MetadataRow
-                            label="Created"
-                            value={new Date(selectedDocument.created_at).toLocaleString()}
+                            label={t("operations.columns.created")}
+                            value={new Date(selectedDocument.created_at).toLocaleString(
+                              i18n.language
+                            )}
                           />
                         )}
                         {selectedDocument.updated_at && (
                           <MetadataRow
-                            label="Updated"
-                            value={new Date(selectedDocument.updated_at).toLocaleString()}
+                            label={t("operations.columns.updated")}
+                            value={new Date(selectedDocument.updated_at).toLocaleString(
+                              i18n.language
+                            )}
                           />
                         )}
                         {selectedDocument.original_text && (
                           <MetadataRow
-                            label="Size"
+                            label={t("documents.columns.size")}
                             value={formatBytes(new Blob([selectedDocument.original_text]).size)}
                           />
                         )}
                         <MetadataRow
-                          label="Tags"
+                          label={t("common.labels.tags")}
                           value={
                             editingTags ? (
                               <div className="flex items-center gap-2">
                                 <Input
                                   value={tagInput}
                                   onChange={(e) => setTagInput(e.target.value)}
-                                  placeholder="tag1, tag2, tag3"
+                                  placeholder={t("documents.placeholders.tags")}
                                   className="text-sm h-7 w-64"
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter") saveDocumentTags();
@@ -1021,7 +1064,9 @@ export function DocumentsView() {
                                     ))}
                                   </div>
                                 ) : (
-                                  <span className="text-sm text-muted-foreground italic">none</span>
+                                  <span className="text-sm text-muted-foreground italic">
+                                    {t("common.states.none")}
+                                  </span>
                                 )}
                                 <Button
                                   variant="ghost"
@@ -1037,22 +1082,22 @@ export function DocumentsView() {
                         />
                         {selectedDocument.retain_params?.context && (
                           <MetadataRow
-                            label="Context"
+                            label={t("common.labels.context")}
                             value={selectedDocument.retain_params.context}
                           />
                         )}
                         {selectedDocument.retain_params?.event_date && (
                           <MetadataRow
-                            label="Event Date"
+                            label={t("documents.columns.eventDate")}
                             value={new Date(
                               selectedDocument.retain_params.event_date
-                            ).toLocaleString()}
+                            ).toLocaleString(i18n.language)}
                           />
                         )}
                         {selectedDocument.retain_params?.metadata &&
                           Object.keys(selectedDocument.retain_params.metadata).length > 0 && (
                             <MetadataRow
-                              label="Metadata"
+                              label={t("auditLogs.detail.metadata")}
                               value={
                                 <MetadataBadges
                                   metadata={selectedDocument.retain_params.metadata}
@@ -1063,7 +1108,7 @@ export function DocumentsView() {
                       </InfoCard>
 
                       <InfoCard
-                        title="Memory Composition"
+                        title={t("bankStats.memoryComposition")}
                         icon={<Network className="w-3.5 h-3.5" />}
                       >
                         <MemoryComposition nodesByFactType={selectedDocument.nodes_by_fact_type} />
@@ -1078,7 +1123,9 @@ export function DocumentsView() {
                     <div className="flex items-center justify-center py-20">
                       <div className="text-center">
                         <div className="text-4xl mb-2">⏳</div>
-                        <div className="text-sm text-muted-foreground">Loading chunks...</div>
+                        <div className="text-sm text-muted-foreground">
+                          {t("documents.chunks.loading")}
+                        </div>
                       </div>
                     </div>
                   ) : chunks.length > 0 ? (
@@ -1092,7 +1139,7 @@ export function DocumentsView() {
                       <div className="text-center">
                         <div className="text-4xl mb-2">📄</div>
                         <div className="text-sm text-muted-foreground">
-                          No chunks found for this document
+                          {t("documents.chunks.empty")}
                         </div>
                       </div>
                     </div>
@@ -1100,7 +1147,7 @@ export function DocumentsView() {
                     <div className="flex items-center justify-center py-20">
                       <div className="text-center">
                         <div className="text-sm text-muted-foreground">
-                          Click the Chunks tab to load chunks
+                          {t("documents.chunks.loadPrompt")}
                         </div>
                       </div>
                     </div>
@@ -1119,31 +1166,35 @@ export function DocumentsView() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogTitle>{t("documents.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete document{" "}
+              {t("documents.delete.confirm")}{" "}
               <span className="font-mono font-semibold">&quot;{documentToDelete?.id}&quot;</span>?
               <br />
               <br />
-              This will also delete{" "}
+              {t("documents.delete.alsoDelete")}{" "}
               {documentToDelete?.memoryCount !== undefined ? (
-                <span className="font-semibold">{documentToDelete.memoryCount} memory units</span>
+                <span className="font-semibold">
+                  {t("documents.delete.memoryUnits", { count: documentToDelete.memoryCount })}
+                </span>
               ) : (
-                "all memory units"
+                t("documents.delete.allMemoryUnits")
               )}{" "}
-              extracted from this document.
+              {t("documents.delete.extractedSuffix")}
               <br />
               <br />
-              <span className="text-destructive font-semibold">This action cannot be undone.</span>
+              <span className="text-destructive font-semibold">
+                {t("common.warnings.cannotBeUndone")}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteDocument}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("common.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1154,12 +1205,14 @@ export function DocumentsView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteResult?.success ? "Document Deleted" : "Error"}
+              {deleteResult?.success ? t("documents.delete.deletedTitle") : t("common.error")}
             </AlertDialogTitle>
             <AlertDialogDescription>{deleteResult?.message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setDeleteResult(null)}>OK</AlertDialogAction>
+            <AlertDialogAction onClick={() => setDeleteResult(null)}>
+              {t("common.actions.ok")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1172,12 +1225,14 @@ export function DocumentsView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {reprocessResult?.success ? "Reprocessing Started" : "Error"}
+              {reprocessResult?.success ? t("documents.reprocess.startedTitle") : t("common.error")}
             </AlertDialogTitle>
             <AlertDialogDescription>{reprocessResult?.message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setReprocessResult(null)}>OK</AlertDialogAction>
+            <AlertDialogAction onClick={() => setReprocessResult(null)}>
+              {t("common.actions.ok")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

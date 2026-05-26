@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useBank } from "@/lib/bank-context";
 import { client } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -91,15 +92,100 @@ type OperationDetails =
     };
 
 const OPERATION_TYPE_OPTIONS = [
-  { value: "all", label: "All types" },
-  { value: "retain", label: "Retain" },
-  { value: "consolidation", label: "Consolidation" },
-  { value: "refresh_mental_model", label: "Mental Model Refresh" },
-  { value: "file_convert_retain", label: "File Convert & Retain" },
-  { value: "webhook_delivery", label: "Webhook Delivery" },
+  { value: "all", labelKey: "operations.filters.allTypes" },
+  { value: "retain", labelKey: "operations.types.retain" },
+  { value: "consolidation", labelKey: "operations.types.consolidation" },
+  { value: "refresh_mental_model", labelKey: "operations.types.mentalModelRefresh" },
+  { value: "file_convert_retain", labelKey: "operations.types.fileConvertRetain" },
+  { value: "webhook_delivery", labelKey: "operations.types.webhookDelivery" },
 ];
 
+const STATUS_FILTER_OPTIONS = [
+  { value: null, labelKey: "operations.statusFilters.all" },
+  { value: "pending", labelKey: "operationStatuses.pending" },
+  { value: "processing", labelKey: "operationStatuses.processing" },
+  { value: "completed", labelKey: "operationStatuses.completed" },
+  { value: "failed", labelKey: "operationStatuses.failed" },
+  { value: "cancelled", labelKey: "operationStatuses.cancelled" },
+];
+
+const OPERATION_TYPE_LABEL_KEYS: Record<string, string> = {
+  retain: "operations.types.retain",
+  consolidation: "operations.types.consolidation",
+  refresh_mental_model: "operations.types.mentalModelRefresh",
+  file_convert_retain: "operations.types.fileConvertRetain",
+  webhook_delivery: "operations.types.webhookDelivery",
+};
+
+function OperationStatusBadge({
+  status,
+  errorMessage,
+  compact = false,
+}: {
+  status: string;
+  errorMessage?: string | null;
+  compact?: boolean;
+}) {
+  const { t } = useTranslation();
+  const label = t(`operationStatuses.${status}`, { defaultValue: status });
+  const gap = compact ? "gap-1" : "gap-1.5";
+
+  if (status === "pending") {
+    return (
+      <span
+        className={`inline-flex items-center ${gap} px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20`}
+      >
+        <Clock className="w-3 h-3" />
+        {label}
+      </span>
+    );
+  }
+  if (status === "processing") {
+    return (
+      <span
+        className={`inline-flex items-center ${gap} px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20`}
+      >
+        <Loader2 className="w-3 h-3 animate-spin" />
+        {label}
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span
+        className={`inline-flex items-center ${gap} px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20`}
+        title={errorMessage ?? undefined}
+      >
+        <AlertCircle className="w-3 h-3" />
+        {label}
+      </span>
+    );
+  }
+  if (status === "completed") {
+    return (
+      <span
+        className={`inline-flex items-center ${gap} px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20`}
+      >
+        <CheckCircle className="w-3 h-3" />
+        {label}
+      </span>
+    );
+  }
+  if (status === "cancelled") {
+    return (
+      <span
+        className={`inline-flex items-center ${gap} px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20`}
+      >
+        <Ban className="w-3 h-3" />
+        {label}
+      </span>
+    );
+  }
+  return <span className="text-xs text-muted-foreground">{label}</span>;
+}
+
 export function BankOperationsView() {
+  const { t, i18n } = useTranslation();
   const { currentBank } = useBank();
   const [operations, setOperations] = useState<Operation[]>([]);
   const [totalOperations, setTotalOperations] = useState(0);
@@ -115,6 +201,13 @@ export function BankOperationsView() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [loadingPayload, setLoadingPayload] = useState(false);
   const [payloadLoadedFor, setPayloadLoadedFor] = useState<string | null>(null);
+  const formatOperationType = (type: string | null | undefined) => {
+    if (!type) return t("entities.notAvailable");
+    const labelKey = OPERATION_TYPE_LABEL_KEYS[type];
+    return labelKey ? t(labelKey) : type;
+  };
+  const formatOperationDate = (date: string | null | undefined) =>
+    date ? new Date(date).toLocaleString(i18n.language) : t("entities.notAvailable");
 
   const loadOperations = useCallback(
     async (
@@ -200,7 +293,7 @@ export function BankOperationsView() {
       setSelectedOperation(details);
     } catch (error) {
       console.error("Error loading operation details:", error);
-      setSelectedOperation({ error: "Failed to load operation details" });
+      setSelectedOperation({ error: t("operations.errors.loadDetails") });
     } finally {
       setLoadingDetails(false);
     }
@@ -242,11 +335,11 @@ export function BankOperationsView() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">Background Operations</h3>
+            <h3 className="text-lg font-semibold">{t("operations.title")}</h3>
             <button
               onClick={() => loadOperations()}
               className="p-1 rounded hover:bg-muted transition-colors"
-              title="Refresh operations"
+              title={t("operations.actions.refresh")}
               disabled={loading}
             >
               <RefreshCw
@@ -255,8 +348,10 @@ export function BankOperationsView() {
             </button>
           </div>
           <p className="text-sm text-muted-foreground">
-            {totalOperations} operation{totalOperations !== 1 ? "s" : ""}
-            {statusFilter ? ` (${statusFilter})` : ""}
+            {t("operations.count", { count: totalOperations })}
+            {statusFilter
+              ? ` (${t(`operationStatuses.${statusFilter}`, { defaultValue: statusFilter })})`
+              : ""}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -265,13 +360,13 @@ export function BankOperationsView() {
             onValueChange={(val) => handleTaskTypeFilterChange(val === "all" ? null : val)}
           >
             <SelectTrigger className="h-9 w-[180px] text-sm">
-              <SelectValue placeholder="All types" />
+              <SelectValue placeholder={t("operations.filters.allTypes")} />
             </SelectTrigger>
             <SelectContent>
               {OPERATION_TYPE_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   <div>
-                    <div>{opt.label}</div>
+                    <div>{t(opt.labelKey)}</div>
                     {opt.value !== "all" && (
                       <div className="text-xs text-muted-foreground font-mono">{opt.value}</div>
                     )}
@@ -281,14 +376,7 @@ export function BankOperationsView() {
             </SelectContent>
           </Select>
           <div className="flex gap-1 bg-muted p-1 rounded-lg">
-            {[
-              { value: null, label: "All" },
-              { value: "pending", label: "Pending" },
-              { value: "processing", label: "Processing" },
-              { value: "completed", label: "Completed" },
-              { value: "failed", label: "Failed" },
-              { value: "cancelled", label: "Cancelled" },
-            ].map((filter) => (
+            {STATUS_FILTER_OPTIONS.map((filter) => (
               <button
                 key={filter.value ?? "all"}
                 onClick={() => handleFilterChange(filter.value)}
@@ -298,7 +386,7 @@ export function BankOperationsView() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {filter.label}
+                {t(filter.labelKey)}
               </button>
             ))}
           </div>
@@ -311,10 +399,10 @@ export function BankOperationsView() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[100px]">{t("common.labels.id")}</TableHead>
+                    <TableHead>{t("operations.columns.type")}</TableHead>
+                    <TableHead>{t("operations.columns.created")}</TableHead>
+                    <TableHead>{t("operations.columns.status")}</TableHead>
                     <TableHead className="w-[80px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -328,44 +416,14 @@ export function BankOperationsView() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {op.id.substring(0, 8)}
                       </TableCell>
-                      <TableCell className="font-medium">{op.task_type}</TableCell>
+                      <TableCell className="font-medium">
+                        {formatOperationType(op.task_type)}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(op.created_at).toLocaleString()}
+                        {formatOperationDate(op.created_at)}
                       </TableCell>
                       <TableCell>
-                        {op.status === "pending" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            <Clock className="w-3 h-3" />
-                            pending
-                          </span>
-                        )}
-                        {op.status === "processing" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            processing
-                          </span>
-                        )}
-                        {op.status === "failed" && (
-                          <span
-                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-                            title={op.error_message ?? undefined}
-                          >
-                            <AlertCircle className="w-3 h-3" />
-                            failed
-                          </span>
-                        )}
-                        {op.status === "completed" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            <CheckCircle className="w-3 h-3" />
-                            completed
-                          </span>
-                        )}
-                        {op.status === "cancelled" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20">
-                            <Ban className="w-3 h-3" />
-                            cancelled
-                          </span>
-                        )}
+                        <OperationStatusBadge status={op.status} errorMessage={op.error_message} />
                       </TableCell>
                       <TableCell>
                         {op.status === "pending" && (
@@ -384,7 +442,7 @@ export function BankOperationsView() {
                             ) : (
                               <X className="w-3 h-3 mr-1" />
                             )}
-                            {cancellingOpId === op.id ? "" : "Cancel"}
+                            {cancellingOpId === op.id ? "" : t("common.actions.cancel")}
                           </Button>
                         )}
                         {(op.status === "failed" || op.status === "cancelled") && (
@@ -403,7 +461,7 @@ export function BankOperationsView() {
                             ) : (
                               <RotateCcw className="w-3 h-3 mr-1" />
                             )}
-                            {retryingOpId === op.id ? "" : "Retry"}
+                            {retryingOpId === op.id ? "" : t("common.actions.retry")}
                           </Button>
                         )}
                       </TableCell>
@@ -416,8 +474,11 @@ export function BankOperationsView() {
             {totalOperations > limit && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Showing {offset + 1}-{Math.min(offset + limit, totalOperations)} of{" "}
-                  {totalOperations}
+                  {t("operations.pagination.showing", {
+                    start: offset + 1,
+                    end: Math.min(offset + limit, totalOperations),
+                    total: totalOperations,
+                  })}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -426,7 +487,7 @@ export function BankOperationsView() {
                     onClick={() => handlePageChange(Math.max(0, offset - limit))}
                     disabled={offset === 0}
                   >
-                    Previous
+                    {t("common.actions.previous")}
                   </Button>
                   <Button
                     variant="outline"
@@ -434,7 +495,7 @@ export function BankOperationsView() {
                     onClick={() => handlePageChange(offset + limit)}
                     disabled={offset + limit >= totalOperations}
                   >
-                    Next
+                    {t("common.actions.next")}
                   </Button>
                 </div>
               </div>
@@ -442,7 +503,11 @@ export function BankOperationsView() {
           </>
         ) : (
           <p className="text-muted-foreground text-center py-8 text-sm">
-            No {statusFilter ? `${statusFilter} ` : ""}operations
+            {statusFilter
+              ? t("operations.empty.filtered", {
+                  status: t(`operationStatuses.${statusFilter}`, { defaultValue: statusFilter }),
+                })
+              : t("operations.empty.all")}
           </p>
         )}
       </div>
@@ -451,7 +516,7 @@ export function BankOperationsView() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Operation Details</DialogTitle>
+            <DialogTitle>{t("operations.details.title")}</DialogTitle>
             <DialogDescription>
               {selectedOperation?.operation_id && (
                 <span className="font-mono text-xs">{selectedOperation.operation_id}</span>
@@ -471,73 +536,52 @@ export function BankOperationsView() {
                   {/* Basic Info */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Status</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {t("operations.columns.status")}
+                      </div>
                       <div className="mt-1">
-                        {selectedOperation.status === "pending" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            <Clock className="w-3 h-3" />
-                            pending
-                          </span>
-                        )}
-                        {selectedOperation.status === "processing" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            processing
-                          </span>
-                        )}
-                        {selectedOperation.status === "failed" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-                            <AlertCircle className="w-3 h-3" />
-                            failed
-                          </span>
-                        )}
-                        {selectedOperation.status === "completed" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            <CheckCircle className="w-3 h-3" />
-                            completed
-                          </span>
-                        )}
-                        {selectedOperation.status === "cancelled" && (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20">
-                            <Ban className="w-3 h-3" />
-                            cancelled
-                          </span>
-                        )}
+                        <OperationStatusBadge status={selectedOperation.status ?? "unknown"} />
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Type</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {t("operations.columns.type")}
+                      </div>
                       <div className="mt-1 font-mono text-sm">
-                        {selectedOperation.operation_type}
+                        {formatOperationType(selectedOperation.operation_type)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Created</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {t("operations.columns.created")}
+                      </div>
                       <div className="mt-1 text-sm">
-                        {selectedOperation.created_at
-                          ? new Date(selectedOperation.created_at).toLocaleString()
-                          : "N/A"}
+                        {formatOperationDate(selectedOperation.created_at)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Updated</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {t("operations.columns.updated")}
+                      </div>
                       <div className="mt-1 text-sm">
-                        {selectedOperation.updated_at
-                          ? new Date(selectedOperation.updated_at).toLocaleString()
-                          : "N/A"}
+                        {formatOperationDate(selectedOperation.updated_at)}
                       </div>
                     </div>
                     {selectedOperation.completed_at && (
                       <div>
-                        <div className="text-sm font-medium text-muted-foreground">Completed</div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          {t("operations.columns.completed")}
+                        </div>
                         <div className="mt-1 text-sm">
-                          {new Date(selectedOperation.completed_at).toLocaleString()}
+                          {formatOperationDate(selectedOperation.completed_at)}
                         </div>
                       </div>
                     )}
                     {selectedOperation.result_metadata?.items_count !== undefined && (
                       <div>
-                        <div className="text-sm font-medium text-muted-foreground">Total Items</div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          {t("operations.columns.totalItems")}
+                        </div>
                         <div className="mt-1 text-sm">
                           {selectedOperation.result_metadata.items_count}
                         </div>
@@ -563,7 +607,7 @@ export function BankOperationsView() {
                           ) : (
                             <X className="w-3 h-3 mr-1" />
                           )}
-                          Cancel
+                          {t("common.actions.cancel")}
                         </Button>
                       )}
                       {(selectedOperation.status === "failed" ||
@@ -580,7 +624,7 @@ export function BankOperationsView() {
                           ) : (
                             <RotateCcw className="w-3 h-3 mr-1" />
                           )}
-                          Retry
+                          {t("common.actions.retry")}
                         </Button>
                       )}
                     </div>
@@ -591,7 +635,7 @@ export function BankOperationsView() {
                     Object.keys(selectedOperation.result_metadata).length > 0 && (
                       <div>
                         <div className="text-sm font-medium text-muted-foreground mb-2">
-                          Metadata
+                          {t("auditLogs.detail.metadata")}
                         </div>
                         <pre className="rounded-lg border bg-muted/30 p-3 text-xs font-mono overflow-x-auto max-h-96 whitespace-pre-wrap break-words">
                           {JSON.stringify(selectedOperation.result_metadata, null, 2)}
@@ -603,7 +647,7 @@ export function BankOperationsView() {
                   {selectedOperation.error_message && (
                     <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
                       <div className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">
-                        Error
+                        {t("common.error")}
                       </div>
                       <div className="text-sm text-red-600/80 dark:text-red-400/80 font-mono">
                         {selectedOperation.error_message}
@@ -616,7 +660,7 @@ export function BankOperationsView() {
                     selectedOperation.child_operations.length > 0 && (
                       <div>
                         <div className="text-sm font-medium text-muted-foreground mb-2">
-                          Sub-batches (
+                          {t("operations.details.subBatches")} (
                           {selectedOperation.result_metadata?.num_sub_batches ||
                             selectedOperation.child_operations.length}
                           )
@@ -624,10 +668,14 @@ export function BankOperationsView() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-[60px]">Index</TableHead>
-                              <TableHead className="w-[100px]">ID</TableHead>
-                              <TableHead className="w-[80px]">Items</TableHead>
-                              <TableHead>Status</TableHead>
+                              <TableHead className="w-[60px]">
+                                {t("operations.columns.index")}
+                              </TableHead>
+                              <TableHead className="w-[100px]">{t("common.labels.id")}</TableHead>
+                              <TableHead className="w-[80px]">
+                                {t("operations.columns.items")}
+                              </TableHead>
+                              <TableHead>{t("operations.columns.status")}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -639,39 +687,11 @@ export function BankOperationsView() {
                                 </TableCell>
                                 <TableCell className="text-sm">{child.items_count}</TableCell>
                                 <TableCell>
-                                  {child.status === "pending" && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                      <Clock className="w-3 h-3" />
-                                      pending
-                                    </span>
-                                  )}
-                                  {child.status === "processing" && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                                      <Loader2 className="w-3 h-3 animate-spin" />
-                                      processing
-                                    </span>
-                                  )}
-                                  {child.status === "failed" && (
-                                    <span
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400"
-                                      title={child.error_message ?? undefined}
-                                    >
-                                      <AlertCircle className="w-3 h-3" />
-                                      failed
-                                    </span>
-                                  )}
-                                  {child.status === "completed" && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                                      <CheckCircle className="w-3 h-3" />
-                                      completed
-                                    </span>
-                                  )}
-                                  {child.status === "cancelled" && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-600 dark:text-gray-400">
-                                      <Ban className="w-3 h-3" />
-                                      cancelled
-                                    </span>
-                                  )}
+                                  <OperationStatusBadge
+                                    status={child.status}
+                                    errorMessage={child.error_message}
+                                    compact
+                                  />
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -689,7 +709,7 @@ export function BankOperationsView() {
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-sm font-medium text-muted-foreground">
-                            Raw payload
+                            {t("operations.details.rawPayload")}
                           </div>
                           {!loadedThisOp && (
                             <Button
@@ -704,7 +724,7 @@ export function BankOperationsView() {
                               ) : (
                                 <Code className="w-3 h-3 mr-1" />
                               )}
-                              Load raw
+                              {t("operations.actions.loadRaw")}
                             </Button>
                           )}
                         </div>
@@ -715,13 +735,12 @@ export function BankOperationsView() {
                         ) : loadedThisOp ? (
                           <p className="text-xs text-muted-foreground">
                             {isParent
-                              ? "This is a parent operation — the raw payload is stored on each sub-batch. Open a child operation to inspect its payload."
-                              : "No raw payload stored for this operation."}
+                              ? t("operations.details.parentRawPayload")
+                              : t("operations.details.noRawPayload")}
                           </p>
                         ) : (
                           <p className="text-xs text-muted-foreground">
-                            Shows the full parameters the operation was submitted with (may be
-                            large).
+                            {t("operations.details.rawPayloadDescription")}
                           </p>
                         )}
                       </div>

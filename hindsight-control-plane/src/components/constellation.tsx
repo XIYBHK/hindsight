@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useMemo, useState } from "react";
 import { prepare, layout, prepareWithSegments, layoutWithLines } from "@chenglou/pretext";
 import type { GraphData, GraphNode, GraphLink } from "./graph-2d";
+import { useTranslation } from "react-i18next";
 
 // ============================================================================
 // Types
@@ -177,6 +178,7 @@ export function Constellation({
   compactLabels,
   sizeLegendLabel,
 }: ConstellationProps) {
+  const { t } = useTranslation();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -533,7 +535,13 @@ export function Constellation({
     ctx.fillStyle = isDark ? "#71717a" : "#71717a";
     ctx.textAlign = "left";
     ctx.fillText(
-      `${preparedNodes.length} memories · ${visibleCount} visible · ${labelsShown} labels · ${linksDrawn} links · zoom ${zoom.toFixed(2)}x`,
+      t("constellation.hud", {
+        memories: preparedNodes.length,
+        visible: visibleCount,
+        labels: labelsShown,
+        links: linksDrawn,
+        zoom: zoom.toFixed(2),
+      }),
       12,
       H - 12
     );
@@ -543,9 +551,10 @@ export function Constellation({
     let legendX = W - 12;
     ctx.font = FONT_BOLD;
     for (const [type, color] of Object.entries(LINK_TYPE_COLORS).reverse()) {
-      const tw = ctx.measureText(type).width;
+      const label = t(`constellation.linkTypes.${type}`, { defaultValue: type });
+      const tw = ctx.measureText(label).width;
       ctx.fillStyle = isDark ? "#a1a1aa" : "#52525b";
-      ctx.fillText(type, legendX, H - 12);
+      ctx.fillText(label, legendX, H - 12);
       legendX -= tw + 4;
       ctx.fillStyle = color;
       ctx.beginPath();
@@ -558,8 +567,11 @@ export function Constellation({
     ctx.textAlign = "left";
     ctx.font = FONT_BOLD;
     ctx.fillStyle = isDark ? "#a1a1aa" : "#52525b";
-    ctx.fillText((heatLegendLabel || "LINKS").toUpperCase(), 12, 36);
-    const [heatLo, heatHi] = heatLegendEndpoints || ["few", "many"];
+    ctx.fillText((heatLegendLabel || t("constellation.legend.links")).toUpperCase(), 12, 36);
+    const [heatLo, heatHi] = heatLegendEndpoints || [
+      t("constellation.legend.few"),
+      t("constellation.legend.many"),
+    ];
     // Size the bar so both endpoint labels fit without overlap (e.g. ISO dates
     // are wider than "few"/"many"). Min 80px keeps the visual weight stable.
     ctx.font = MONO;
@@ -585,8 +597,10 @@ export function Constellation({
       ctx.font = MONO;
       const labelColor = isDark ? "#a1a1aa" : "#71717a";
       ctx.fillStyle = labelColor;
-      ctx.fillText("few", 12, 98);
-      const fewW = ctx.measureText("few").width;
+      const fewLabel = t("constellation.legend.few");
+      const manyLabel = t("constellation.legend.many");
+      ctx.fillText(fewLabel, 12, 98);
+      const fewW = ctx.measureText(fewLabel).width;
       const dotsStart = 12 + fewW + 8;
       const dotColor = isDark ? "#a1a1aa" : "#52525b";
       ctx.fillStyle = dotColor;
@@ -600,19 +614,30 @@ export function Constellation({
       ctx.arc(dotsStart + 30, 94, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = labelColor;
-      ctx.fillText("many", dotsStart + 42, 98);
+      ctx.fillText(manyLabel, dotsStart + 42, 98);
     }
 
     // Instructions
     ctx.textAlign = "left";
     ctx.font = MONO;
     ctx.fillStyle = isDark ? "#52525b" : "#a1a1aa";
-    ctx.fillText("Scroll to zoom · Drag to pan · Hover to explore · Click to select", 12, 16);
+    ctx.fillText(t("constellation.instructions"), 12, 16);
 
     ctx.restore();
 
     animRef.current = requestAnimationFrame(animate);
-  }, [isDark, preparedNodes, linksWithIndices, linksByNode]);
+  }, [
+    compactLabels,
+    heatLegendEndpoints,
+    heatLegendLabel,
+    isDark,
+    linksByNode,
+    linksWithIndices,
+    nodeSizeFn,
+    preparedNodes,
+    sizeLegendLabel,
+    t,
+  ]);
 
   // ----- Label drawing helper -----
   function drawLabel(
@@ -780,7 +805,7 @@ export function Constellation({
         // Type badge + link count
         let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">`;
         html += `<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:${nodeColor};background:${nodeColor}18;padding:2px 8px;border-radius:4px">${factType}</span>`;
-        html += `<span style="font-size:10px;color:${muted}">${linkCount} link${linkCount !== 1 ? "s" : ""}</span>`;
+        html += `<span style="font-size:10px;color:${muted}">${t("constellation.tooltip.links", { count: linkCount })}</span>`;
         html += `</div>`;
 
         // Text
@@ -790,7 +815,7 @@ export function Constellation({
         html += `<div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid ${isDark ? "#27272a" : "#e4e4e7"};padding-top:8px">`;
 
         if (context) {
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">Context</span><span style="${valStyle}">${context}</span></div>`;
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${t("common.labels.context")}</span><span style="${valStyle}">${context}</span></div>`;
         }
 
         // Format ISO timestamp as "YYYY-MM-DD HH:MM" — keeps the row compact
@@ -801,19 +826,19 @@ export function Constellation({
           const start = fmtTs(occurredStart);
           const end = occurredEnd ? fmtTs(occurredEnd) : null;
           const occurredDisplay = end && end !== start ? `${start} → ${end}` : start;
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">Occurred</span><span style="${valStyle}">${occurredDisplay}</span></div>`;
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${t("observationHistory.occurred")}</span><span style="${valStyle}">${occurredDisplay}</span></div>`;
         }
 
         if (mentionedAt) {
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">Mentioned</span><span style="${valStyle}">${fmtTs(mentionedAt)}</span></div>`;
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${t("observationHistory.mentioned")}</span><span style="${valStyle}">${fmtTs(mentionedAt)}</span></div>`;
         }
 
         if (proofCount && proofCount > 1) {
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">Evidence</span><span style="${valStyle}">${proofCount} sources</span></div>`;
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${t("constellation.tooltip.evidence")}</span><span style="${valStyle}">${t("constellation.tooltip.sources", { count: proofCount })}</span></div>`;
         }
 
         if (documentId) {
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">Document</span><span style="font-size:11px;font-family:monospace;color:${muted}">${String(documentId).slice(0, 12)}...</span></div>`;
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${t("documents.detail.document")}</span><span style="font-size:11px;font-family:monospace;color:${muted}">${String(documentId).slice(0, 12)}...</span></div>`;
         }
 
         html += `</div>`;
@@ -917,7 +942,7 @@ export function Constellation({
       canvas.removeEventListener("mouseup", handleMouseUp);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [animate, preparedNodes, onNodeClick, isFullscreen]);
+  }, [animate, preparedNodes, onNodeClick, isFullscreen, t]);
 
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev);
@@ -992,7 +1017,7 @@ export function Constellation({
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLButtonElement).style.opacity = "0.7";
         }}
-        title={isFullscreen ? "Exit fullscreen (Esc)" : "Enter fullscreen"}
+        title={t(isFullscreen ? "constellation.fullscreen.exit" : "constellation.fullscreen.enter")}
       >
         {isFullscreen ? (
           <svg
@@ -1027,7 +1052,11 @@ export function Constellation({
             <line x1="3" y1="21" x2="10" y2="14" />
           </svg>
         )}
-        {isFullscreen ? "Exit" : "Fullscreen"}
+        {t(
+          isFullscreen
+            ? "constellation.fullscreen.exitLabel"
+            : "constellation.fullscreen.enterLabel"
+        )}
       </button>
 
       {/* Tooltip */}

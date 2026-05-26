@@ -1,4 +1,4 @@
-const en = {
+const baseEn = {
   common: {
     error: "Error",
     github: "GitHub",
@@ -82,7 +82,9 @@ const en = {
   },
   factTypes: {
     label: "Fact types:",
+    all: "All",
     observation: "Observation",
+    opinion: "Opinion",
     world: "World",
     experience: "Experience",
   },
@@ -303,5 +305,1251 @@ const en = {
     observationsEnableSuffix: "to enable.",
   },
 };
+
+const extraEn = {
+  common: {
+    actions: {
+      add: "Add",
+      adding: "Adding...",
+      clear: "Clear",
+      compact: "Compact",
+      create: "Create",
+      creating: "Creating...",
+      deselect: "Deselect",
+      deselectAll: "Deselect all",
+      edit: "Edit",
+      expand: "Expand",
+      first: "First",
+      last: "Last",
+      learnMore: "Learn more",
+      loadMore: "Load more",
+      next: "Next",
+      open: "Open",
+      previous: "Previous",
+      refresh: "Refresh",
+      retry: "Retry",
+      saveChanges: "Save Changes",
+      selectAll: "Select all",
+      update: "Update",
+      updating: "Updating...",
+      uploading: "Uploading...",
+      view: "View",
+    },
+    labels: {
+      context: "Context",
+      optional: "Optional",
+    },
+    states: {
+      all: "All",
+      current: "Current",
+      default: "Default",
+      disabled: "Disabled",
+      enabled: "Enabled",
+      inactive: "Inactive",
+      inherited: "Inherited",
+      new: "New",
+      no: "No",
+      none: "None",
+      unchanged: "Unchanged",
+      unnamed: "Unnamed",
+      yes: "Yes",
+    },
+    warnings: {
+      cannotBeUndone: "This action cannot be undone.",
+    },
+  },
+  operationStatuses: {
+    pending: "Pending",
+    processing: "Processing",
+    completed: "Completed",
+    failed: "Failed",
+    cancelled: "Cancelled",
+  },
+  bankSelector: {
+    logout: "Log out",
+    viewOnGithub: "View on GitHub",
+    theme: {
+      switchToDark: "Switch to dark theme",
+      switchToLight: "Switch to light theme",
+    },
+    createDialog: {
+      title: "Create New Memory Bank",
+      bankIdPlaceholder: "bank-id",
+      importFromTemplate: "Import from template",
+      browseTemplates: "Browse templates",
+      templateDescription: "Choose a template to prefill the new bank.",
+      errors: {
+        createBankFailed: "Failed to create memory bank.",
+        importTemplateFailed: "Failed to import template.",
+        invalidTemplateJson: "Template must be valid JSON.",
+      },
+    },
+    documentDialog: {
+      title: "Add New Document",
+      description: "Retain a document as memories in the current bank.",
+      source: "Source",
+      strategy: "Strategy",
+      strategyPlaceholder: "Default strategy",
+      strategyDescription: "Optional retain strategy override for this document.",
+      processAsync: "Process asynchronously",
+      contentRequired: "Document content is required.",
+      contentPlaceholder: "Paste document text...",
+      optionalIdPlaceholder: "Optional ID",
+      optionalDocumentIdPlaceholder: "Optional document ID",
+      optionalContextPlaceholder: "Optional context",
+      documentContextPlaceholder: "Document context",
+      entitiesPlaceholder: "Entities JSON",
+      entitiesDescription: "Optional structured entities metadata.",
+      metadataFormatExample: '{ "source": "notebook", "priority": "high" }',
+      metadataPlaceholder: "Optional metadata JSON",
+      tagsDescription: "Comma-separated tags used for filtering and observation scopes.",
+      tagsPlaceholder: "project, decision, follow-up",
+      metadataFormatBefore: "Metadata must be valid",
+      metadataFormatAfter: "JSON.",
+      editFileMetadata: "Edit file metadata",
+      uploadingFiles: "Uploading files...",
+      uploadFiles: "Upload Files",
+      uploadFilesCount_one: "Upload {{count}} file",
+      uploadFilesCount_other: "Upload {{count}} files",
+      fileDropLabel: "Drop files here or click to choose",
+      fileUploadDisabledTitle: "File Upload API Disabled",
+      fileUploadDisabledDescription: "File upload is disabled on this server.",
+      fileUploadEnablePrefix: "Set",
+    },
+    observationScopes: {
+      allCombinations: "All combinations",
+      combined: "Combined",
+      custom: "Custom",
+      customPlaceholder: "Custom observation scopes JSON",
+      moreScopes: "+{{count}} more",
+      perTag: "Per tag",
+      previewHint: "Preview of observation scopes created from selected tags.",
+      questionSingle: "Create an observation scope for this tag?",
+      questionMultiple: "Create observation scopes for these tags?",
+    },
+  },
+  auditLogs: {
+    count_one: "{{count}} audit log",
+    count_other: "{{count}} audit logs",
+    empty: "No audit logs found",
+    chart: {
+      title: "Request Volume",
+      empty: "No request volume data",
+      total: "{{count}} total",
+    },
+    actions: {
+      createBank: "Create bank",
+      updateBank: "Update bank",
+      clearMemories: "Clear memories",
+      batchRetain: "Batch retain",
+      createMentalModel: "Create mental model",
+      refreshMentalModel: "Refresh mental model",
+      deleteMentalModel: "Delete mental model",
+      createDirective: "Create directive",
+      deleteDirective: "Delete directive",
+    },
+    columns: {
+      action: "Action",
+      duration: "Duration",
+      time: "Time",
+      transport: "Transport",
+    },
+    dateRanges: {
+      allTime: "All time",
+      lastHour: "Last hour",
+      last24Hours: "Last 24 hours",
+      last7Days: "Last 7 days",
+      last30Days: "Last 30 days",
+    },
+    periods: {
+      today: "Today",
+      last7Days: "Last 7 days",
+      last30Days: "Last 30 days",
+    },
+    filters: {
+      allActions: "All actions",
+      allTransports: "All transports",
+    },
+    transports: {
+      http: "HTTP",
+      mcp: "MCP",
+      system: "System",
+    },
+    pagination: {
+      page: "Page {{current}} of {{total}}",
+    },
+    detail: {
+      title: "Audit Log",
+      action: "Action",
+      duration: "Duration",
+      metadata: "Metadata",
+      request: "Request",
+      response: "Response",
+      started: "Started",
+      transport: "Transport",
+    },
+  },
+  operations: {
+    title: "Background Operations",
+    count_one: "{{count}} operation",
+    count_other: "{{count}} operations",
+    actions: {
+      loadRaw: "Load raw payload",
+      refresh: "Refresh operations",
+    },
+    columns: {
+      completed: "Completed",
+      created: "Created",
+      index: "Index",
+      items: "Items",
+      status: "Status",
+      totalItems: "Total Items",
+      type: "Type",
+      updated: "Updated",
+    },
+    details: {
+      title: "Operation Details",
+      noRawPayload: "No raw payload available",
+      parentRawPayload: "Parent raw payload",
+      rawPayload: "Raw payload",
+      rawPayloadDescription: "Original operation payload returned by the API.",
+      subBatches: "Sub-batches",
+    },
+    empty: {
+      all: "No operations yet",
+      filtered: "No {{status}} operations",
+    },
+    errors: {
+      loadDetails: "Failed to load operation details",
+    },
+    filters: {
+      allTypes: "All types",
+    },
+    pagination: {
+      showing: "Showing {{start}}-{{end}} of {{total}}",
+    },
+    statusFilters: {
+      all: "All statuses",
+    },
+    types: {
+      retain: "Retain",
+      consolidation: "Consolidation",
+      mentalModelRefresh: "Mental model refresh",
+      fileConvertRetain: "File convert retain",
+      webhookDelivery: "Webhook delivery",
+    },
+  },
+  bankConfig: {
+    actions: {
+      addStrategy: "Add strategy",
+    },
+    disabled: {
+      title: "Bank configuration is disabled",
+      enablePrefix: "Set",
+      enableSuffix: "to enable per-bank configuration.",
+    },
+    dialogs: {
+      deleteStrategy: {
+        title: "Delete {{name}}?",
+        description: "This retain strategy override will be removed from the bank configuration.",
+      },
+    },
+    errors: {
+      saveGemini: "Failed to save Gemini settings",
+      saveMcp: "Failed to save MCP settings",
+      saveObservations: "Failed to save observations settings",
+      saveReflect: "Failed to save reflect settings",
+      saveRetain: "Failed to save retain settings",
+    },
+    sections: {
+      retain: {
+        title: "Retain",
+        description:
+          "Default extraction settings and named strategies. Pass a strategy name on retain requests to override defaults per item.",
+      },
+      observations: {
+        title: "Observations",
+        description: "Control how facts are synthesized into durable observations.",
+      },
+      reflect: {
+        title: "Reflect",
+        description: "Shape how the bank reasons and responds in reflect operations.",
+      },
+      mcp: {
+        title: "MCP Tools",
+        description: "Choose which tools this bank exposes through MCP.",
+      },
+      models: {
+        title: "Models",
+        description: "Configure model-provider specific behavior.",
+      },
+    },
+    fields: {
+      chunkSize: {
+        label: "Chunk Size",
+        description: "Maximum text chunk size used during retain extraction.",
+      },
+      customExtractionPrompt: {
+        label: "Custom Extraction Prompt",
+        description: "Prompt instructions used when extraction mode is set to custom.",
+      },
+      defaultStrategy: {
+        label: "Default strategy",
+        description: "Applied automatically when no strategy is specified on a request.",
+      },
+      enableObservations: {
+        label: "Enable Observations",
+        description: "Enable automatic consolidation of facts into observations.",
+      },
+      extractionMode: {
+        label: "Extraction Mode",
+        description: "How aggressively the retain pipeline should extract facts from text.",
+      },
+      freeFormEntities: {
+        label: "Free-form Entities",
+        description: "Allow entity labels outside the configured schema.",
+      },
+      llmBatchSize: {
+        label: "LLM Batch Size",
+        description:
+          "Number of facts sent to the LLM in a single consolidation call. Higher values reduce LLM calls at the cost of larger prompts. Leave blank to use the server default.",
+      },
+      maxObservationsPerScope: {
+        label: "Max Observations Per Scope",
+        description:
+          "Maximum number of observations allowed per tag scope. When the limit is reached, only updates and deletes are allowed. Observations with no tags are not subject to this limit. -1 = unlimited.",
+      },
+      mission: {
+        label: "Mission",
+      },
+      observationsMission: {
+        description:
+          "What this bank should synthesize into durable observations. Replaces the built-in consolidation rules; leave blank to use the server default.",
+      },
+      reflectMission: {
+        label: "Mission",
+        description: "Agent identity and purpose. Used as framing context in reflect.",
+      },
+      retainMission: {
+        description: "Extraction mission used by retain. Leave blank to use the server default.",
+      },
+      restrictTools: {
+        label: "Restrict Tools",
+        description: "Limit MCP access to the selected tools for this bank.",
+      },
+      sourceFactsMaxTokens: {
+        label: "Source Facts Max Tokens",
+        description:
+          "Total token budget for source facts included with observations during consolidation. -1 = unlimited.",
+      },
+      sourceFactsMaxTokensPerObservation: {
+        label: "Source Facts Max Tokens Per Observation",
+        description:
+          "Per-observation token cap for source facts during consolidation. Each observation gets at most this many tokens of source facts. -1 = unlimited.",
+      },
+    },
+    extractionModes: {
+      concise: "Concise",
+      verbose: "Verbose",
+      verbatim: "Verbatim",
+      chunks: "Chunks",
+      custom: "Custom",
+    },
+    placeholders: {
+      inheritedFromDefault: "Inherited from default",
+      observationsMission:
+        "e.g. Observations are stable facts about people and projects. Always include preferences, skills, and recurring patterns. Ignore one-off events and ephemeral state.",
+      reflectMission:
+        "e.g. You are a senior engineering assistant. Always ground answers in documented decisions and rationale. Ignore speculation. Be direct and precise.",
+      retainMission:
+        "e.g. Extract stable user preferences, project facts, and decisions. Ignore transient UI state.",
+      serverDefault: "Server default",
+      strategyName: "Strategy name",
+    },
+    traits: {
+      skepticism: {
+        label: "Skepticism",
+        description: "How skeptical vs trusting when evaluating claims.",
+        low: "Trusting",
+        high: "Skeptical",
+      },
+      literalism: {
+        label: "Literalism",
+        description: "How literally to interpret information.",
+        low: "Flexible",
+        high: "Literal",
+      },
+      empathy: {
+        label: "Empathy",
+        description: "How much to consider emotional and interpersonal context.",
+        low: "Detached",
+        high: "Empathetic",
+      },
+    },
+    validation: {
+      nameRequired: "Name is required.",
+    },
+    mcp: {
+      enabledCount: "{{selected}} / {{total}} enabled",
+      noneSelectedWarning: "No MCP tools are selected for this bank.",
+      groups: {
+        core: "Core",
+        bankManagement: "Bank management",
+        mentalModels: "Mental models",
+        directives: "Directives",
+        memories: "Memories",
+        documents: "Documents",
+        operations: "Operations",
+        tags: "Tags",
+      },
+    },
+    entityLabels: {
+      title: "Entity Labels",
+      description: "Define structured entity labels extracted during retain.",
+      count_one: "{{count}} label",
+      count_other: "{{count}} labels",
+      empty: "No entity labels configured.",
+      tag: "Tag",
+      tagTitle: "Use this label as a tag",
+      noFields: "No fields yet",
+      noValues: "No values yet",
+      examplePrefix: "Example:",
+      exampleAnyText: "any text",
+      exampleValue: "value",
+      actions: {
+        addField: "Add field",
+        addLabel: "Add label",
+        addValue: "Add value",
+      },
+      fieldTypes: {
+        text: "Text",
+        value: "Value",
+        multiValues: "Multi-values",
+        map: "Map",
+      },
+      placeholders: {
+        fieldDescription: "Field description",
+        fieldName: "field_name",
+        value: "value",
+        valueDescription: "Value description",
+      },
+    },
+    gemini: {
+      title: "Gemini",
+      custom: "Custom",
+      safetySettings: "Safety settings",
+      safetyDescription: "Override Gemini safety settings for this bank.",
+      thresholdDescription: "Choose the blocking threshold for each Gemini harm category.",
+      harmCategories: {
+        harassment: "Harassment",
+        hateSpeech: "Hate Speech",
+        sexuallyExplicit: "Sexually Explicit",
+        dangerousContent: "Dangerous Content",
+      },
+      thresholds: {
+        unspecified: "Unspecified (use Gemini default)",
+        off: "Off (filter disabled)",
+        blockNone: "Block none",
+        blockLowAndAbove: "Block low & above",
+        blockMediumAndAbove: "Block medium & above",
+        blockOnlyHigh: "Block only high",
+      },
+    },
+  },
+  bankProfile: {
+    loadingProfile: "Loading profile...",
+    noBankDescription: "Select a memory bank to view its profile.",
+    traitsDescription: "Disposition traits shape reflect responses.",
+    traits: {
+      skepticism: {
+        label: "Skepticism",
+        description: "How skeptical vs trusting when evaluating claims.",
+        low: "Trusting",
+        high: "Skeptical",
+      },
+      literalism: {
+        label: "Literalism",
+        description: "How literally to interpret information.",
+        low: "Flexible",
+        high: "Literal",
+      },
+      empathy: {
+        label: "Empathy",
+        description: "How much to consider emotional and interpersonal context.",
+        low: "Detached",
+        high: "Empathetic",
+      },
+    },
+    disposition: {
+      title: "Disposition",
+    },
+    mission: {
+      title: "Mission",
+      description: "High-level purpose used as reflect context.",
+      empty: "No mission configured.",
+      placeholder: "Describe what this bank is for...",
+    },
+    directives: {
+      title: "Directives",
+      description: "Hard rules injected into reflect prompts.",
+      empty: "No directives yet.",
+      detailTitle: "Directive Details",
+      labels: {
+        nameRequired: "Name *",
+        priority: "Priority",
+        rule: "Rule",
+        ruleRequired: "Rule *",
+      },
+      placeholders: {
+        name: "Directive name",
+        rule: "Always...",
+      },
+    },
+    dialogs: {
+      clearObservations: {
+        stats: "This will delete {{count}} observations.",
+      },
+      deleteBank: {
+        stats:
+          "This will delete {{memories}} memories, {{documents}} documents, and {{links}} links.",
+      },
+      deleteDirective: {
+        title: "Delete Directive",
+        confirm: "Are you sure you want to delete this directive?",
+      },
+      directive: {
+        createTitle: "Create Directive",
+        editTitle: "Edit Directive",
+      },
+      disposition: {
+        title: "Edit Disposition",
+      },
+      mission: {
+        title: "Edit Mission",
+      },
+    },
+  },
+  bankStats: {
+    activity: "Activity",
+    activityTitle: "Recent Activity",
+    consolidation: {
+      title: "Consolidation",
+      done: "Done",
+      last: "Last",
+      viewFailedMemories: "View failed memories",
+    },
+    empty: {
+      noActivity: "No activity yet",
+      noLinks: "No links yet",
+      noMemories: "No memories yet",
+    },
+    failedConsolidations: {
+      title: "Failed Consolidations",
+      description: "Memories that failed during observation consolidation.",
+      empty: "No failed consolidations",
+      failedCount_one: "{{count}} failed memory",
+      failedCount_other: "{{count}} failed memories",
+      recoverAll: "Recover all",
+      recoverQueued: "Recovery queued",
+      columns: {
+        failedAt: "Failed at",
+      },
+    },
+    timeFields: {
+      ingested: {
+        short: "Ing",
+        long: "Ingested",
+      },
+      mentioned: {
+        short: "Men",
+        long: "Mentioned",
+      },
+      occurred: {
+        short: "Occ",
+        long: "Occurred",
+      },
+    },
+    linkTypeLabels: {
+      causal: "Causal",
+      entity: "Entity",
+      semantic: "Semantic",
+      temporal: "Temporal",
+    },
+    periods: {
+      "1h": "1h",
+      "12h": "12h",
+      "1d": "1d",
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d",
+    },
+    linkTypes: "Link Types",
+    links: "Links",
+    memories: "Memories",
+    memoryComposition: "Memory Composition",
+    memoryStore: "Memory store",
+    mentalModels: {
+      stale: "Stale",
+      upToDate: "Up to date",
+    },
+    never: "Never",
+    total: "Total",
+    totalWithCount: "{{count}} total",
+    value: "Value",
+  },
+  dataView: {
+    loadingMemories: "Loading memories...",
+    searchPlaceholder: "Search memories...",
+    colorBy: {
+      label: "Color by",
+      mentioned: "Mentioned",
+      occurredEnd: "Occurred end",
+      occurredStart: "Occurred start",
+    },
+    consolidation: {
+      allConsolidated: "All consolidated as of {{last}}",
+      inSync: "In sync",
+      pending: "Pending",
+      pendingTitle: "Consolidation pending",
+      refreshObservations: "Refresh observations",
+    },
+    constellation: {
+      title: "Constellation",
+      description: "Explore linked memories as an interactive constellation.",
+      recencyLegend: "recency · {{basis}}",
+    },
+    controls: {
+      allLinksShown: "All links shown",
+      clickNodeHint: "Click a node to filter details.",
+      display: "Display",
+      hidePanel: "Hide panel",
+      maxNodes: "Max nodes",
+      nodeLimitWarning: "Only the strongest {{count}} nodes are shown for performance.",
+      performance: "Performance",
+      showLabels: "Show labels",
+      showPanel: "Show panel",
+    },
+    count: {
+      matching_one: "{{count}} matching memory",
+      matching_other: "{{count}} matching memories",
+      memories_one: "{{count}} memory",
+      memories_other: "{{count}} memories",
+      showingTotal: "Showing {{shown}} of {{total}}",
+      total_one: "{{count}} total memory",
+      total_other: "{{count}} total memories",
+    },
+    empty: {
+      addDocumentDescription: "Add a document to create memories.",
+      filtered: "No memories match your filters.",
+      noData: "No data to display.",
+      noMemories: "No memories yet.",
+      notFound: "No matching memories found.",
+    },
+    graph: {
+      clickToFilter: "Click a node to filter",
+      links: "links",
+      linksLabel: "Links",
+      nodes: "Nodes",
+    },
+    timeline: {
+      emptyDescription: "Memories with dates will appear here.",
+      emptyTitle: "No Timeline Data",
+      granularity: {
+        day: "Day",
+        week: "Week",
+        month: "Month",
+        year: "Year",
+      },
+      items_one: "{{count}} item",
+      items_other: "{{count}} items",
+      withoutDates: "Without dates",
+      withoutDatesShort: "No dates",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+    },
+    viewModes: {
+      constellation: "Constellation",
+      graph: "Graph",
+      table: "Table",
+      timeline: "Timeline",
+    },
+  },
+  documents: {
+    loading: "Loading documents...",
+    empty: "No documents yet",
+    count_one: "{{count}} document",
+    count_other: "{{count}} documents",
+    searchPlaceholder: "Search documents...",
+    loadPrompt: "Select a document to load details.",
+    actions: {
+      reprocess: "Reprocess",
+      viewChunk: "View chunk",
+      viewDocument: "View document",
+    },
+    columns: {
+      documentId: "Document ID",
+      eventDate: "Event Date",
+      memoryUnits: "Memory Units",
+      size: "Size",
+    },
+    chunks: {
+      empty: "No chunks found for this document.",
+      loading: "Loading chunks...",
+      loadPrompt: "Select a chunk to view details.",
+      factTabs: {
+        observation: "Observation",
+      },
+    },
+    delete: {
+      title: "Delete Document",
+      confirm: "Are you sure you want to delete this document?",
+      alsoDelete: "Also delete",
+      memoryUnits: "memory units",
+      allMemoryUnits: "all extracted memory units",
+      extractedSuffix: "extracted from this document.",
+      deletedTitle: "Document deleted",
+      deleted: "The document was deleted.",
+      error: "Failed to delete document.",
+    },
+    detail: {
+      document: "Document",
+      documentTitle: "Document Details",
+      documentDescription: "Metadata and original text for this document.",
+      loading: "Loading document details...",
+      loadingDocument: "Loading document...",
+      storedContent: "Stored content",
+      chunks: "Chunks",
+      chunk: "Chunk",
+      chunkTitle: "Chunk Details",
+      chunkDescription: "Chunk text and extracted memory units.",
+      chunkId: "Chunk ID",
+      chunkIndex: "Chunk index",
+      chunkText: "Chunk Text",
+      originalText: "Original Text",
+      characters: "{{count}} characters",
+      charactersShort: "{{count}} chars",
+      textLength: "Text length",
+      noChunkData: "No chunk data available.",
+      noDocumentData: "No document data available.",
+    },
+    editContent: {
+      warning: "Editing content will replace the stored document text.",
+    },
+    placeholders: {
+      tags: "Tags, comma-separated",
+      tagsShort: "tags",
+    },
+    reprocess: {
+      startedTitle: "Reprocessing Started",
+      started: "Document reprocessing has started.",
+      error: "Failed to reprocess document.",
+    },
+  },
+  memoryDetails: {
+    title: "Memory Details",
+    loading: "Loading memory...",
+    memory: "Memory",
+    memoryId: "Memory ID",
+    sourceFactsLabel: "Source Facts",
+    sourceMemories: "Source Memories",
+    sources: "Sources",
+    history: "History",
+    noHistory: "No history available.",
+    observationScopes: "Observation scopes",
+    viewHistory: "View history",
+  },
+  mentalModels: {
+    searchPlaceholder: "Filter mental models by name, query, or content...",
+    filteredCount: "{{filtered}} of {{total}} mental models",
+    count_one: "{{count}} mental model",
+    count_other: "{{count}} mental models",
+    refreshedRelative: "Refreshed {{time}}",
+    actions: {
+      add: "Add Mental Model",
+      generating: "Generating...",
+      refreshManually: "Refresh Manually",
+    },
+    dialogs: {
+      create: {
+        title: "Create Mental Model",
+        description:
+          "Create a mental model by running a query. The content will be auto-generated and can be refreshed later.",
+      },
+      delete: {
+        title: "Delete Mental Model",
+        confirm: "Are you sure you want to delete",
+      },
+      update: {
+        title: "Update Mental Model",
+        description: "Update the mental model configuration.",
+      },
+    },
+    empty: {
+      filtered: "No mental models match your filter.",
+      noBank: "Select a memory bank to view mental models.",
+      noContent: "No content generated yet.",
+      none: "No mental models yet. Create a mental model to generate and save a summary from your memories.",
+      select: "Select a mental model to view details.",
+      short: "No mental models",
+    },
+    includeChunksOptions: {
+      default: "Default",
+      yes: "Yes",
+      no: "No",
+    },
+    labels: {
+      excludeAllMentalModels: "Exclude all mental models",
+      excludeMentalModelIds: "Exclude mental model IDs",
+      factTypes: "Fact types",
+      includeChunks: "Include chunks",
+      maxTokens: "Max tokens",
+      nameRequired: "Name *",
+      recallChunksMaxTokens: "Recall chunks max tokens",
+      recallMaxTokens: "Recall max tokens",
+      refreshMode: "Refresh mode",
+      sourceQueryRequired: "Source query *",
+      tagGroups: "Tag Groups",
+      tagGroupsJson: "Tag Groups JSON",
+      tagsMatch: "Tags match",
+    },
+    pagination: {
+      range: "{{start}}-{{end}} of {{total}}",
+    },
+    placeholders: {
+      excludeMentalModelIds: "IDs, comma-separated",
+      id: "e.g., team-communication",
+      name: "e.g., Team communication",
+      sourceQuery: "What should this mental model summarize?",
+      tagGroupsJson: '[["project-a", "urgent"], ["project-b"]]',
+      tags: "Tags, comma-separated",
+    },
+    recall: {
+      description: "Control recall inputs used to generate this mental model.",
+      leaveEmpty: "Leave empty to use defaults.",
+      maxTokensDescription: "Token budget for recalled facts.",
+      chunksMaxTokensDescription: "Token budget for recalled document chunks.",
+    },
+    refresh: {
+      auto: "Auto Refresh",
+      manual: "Manual",
+      autoRefreshAfterConsolidation: "Auto refresh after consolidation",
+      deltaDescription: "Delta mode refreshes from changes since the last refresh.",
+      modes: {
+        full: "Full",
+        delta: "Delta",
+      },
+    },
+    sections: {
+      otherMentalModels: "Other mental models",
+      refresh: "Refresh",
+    },
+    tabs: {
+      general: "General",
+      options: "Options",
+    },
+    tags: {
+      descriptionBeforeStrong: "Use",
+      descriptionAfterStrong: "logic for tags. Use",
+      descriptionAfterCode: "for strict matching. Configure",
+      descriptionSuffix: "only when advanced grouping is needed.",
+      operatorAnd: "and",
+    },
+    tagGroupsDescription: "JSON array of tag groups.",
+    tagsMatchDescription: "Controls how selected tags are matched.",
+    tagsMatchOptions: {
+      default: "Default",
+      any: "Any",
+      all: "All",
+      anyStrict: "Any (strict)",
+      allStrict: "All (strict)",
+    },
+    toasts: {
+      invalidTagGroupsJson: "Invalid JSON in Tag Groups field",
+      refreshed: "Mental model refreshed",
+      refreshTimeout: "Refresh timeout",
+    },
+    viewModes: {
+      dashboard: "Dashboard",
+      list: "List",
+    },
+  },
+  mentalModelDetails: {
+    title: "Mental Model Details",
+    characters: "{{count}} characters",
+    storedContent: "Stored content",
+    inSync: "In sync",
+    inSyncTitle: "Mental model is in sync",
+    stale: "Stale",
+    staleTitle: "Refresh recommended",
+    noBasedOnData: "No source memory data available.",
+    noSourceData: "No source data available.",
+    actions: {
+      reloadData: "Reload data",
+    },
+    configuration: {
+      created: "Created",
+      excludedIds: "Excluded IDs",
+      identity: "Identity",
+      lastRefreshed: "Last refreshed",
+      maxTokens: "Max tokens",
+      recallParameters: "Recall parameters",
+      refreshMode: "Refresh mode",
+      refreshTrigger: "Refresh trigger",
+      sourceQuery: "Source query",
+      timing: "Timing",
+    },
+    diff: {
+      after: "After",
+      basedOn: "Based on",
+      before: "Before",
+      content: "Content",
+      kept: "Kept",
+    },
+    history: {
+      changed: "Changed",
+      empty: "No refresh history yet.",
+      notCaptured: "Previous content was not captured.",
+      previousContentUnavailable: "Previous content unavailable.",
+    },
+    tabs: {
+      configuration: "Configuration",
+      content: "Content",
+      history: "History",
+    },
+    toasts: {
+      refreshTimeoutDescription: "The refresh request did not complete before the timeout.",
+    },
+  },
+  observationHistory: {
+    changePosition: "Change {{index}} of {{total}}",
+    dates: "Dates",
+    memoryUnavailable: "Memory unavailable",
+    mentioned: "Mentioned",
+    mentionedAt: "Mentioned at",
+    occurred: "Occurred",
+    occurredEnd: "Occurred end",
+    occurredStart: "Occurred start",
+    sourceFacts: "Source Facts",
+  },
+  constellation: {
+    fullscreen: {
+      enter: "Fullscreen",
+      enterLabel: "Enter fullscreen constellation",
+      exit: "Exit fullscreen",
+      exitLabel: "Exit fullscreen constellation",
+    },
+    hud: "{{shown}} / {{total}} nodes",
+    instructions: "Drag to rotate, scroll to zoom, and click a node to inspect linked memories.",
+    legend: {
+      few: "few",
+      links: "links",
+      many: "many",
+    },
+    linkTypes: {
+      causal: "Causal",
+      entity: "Entity",
+      semantic: "Semantic",
+      temporal: "Temporal",
+    },
+    tooltip: {
+      evidence: "Evidence",
+      links: "Links",
+      sources: "Sources",
+    },
+  },
+  graph: {
+    loading: "Loading graph...",
+    empty: "No memories to display.",
+    controlsHint: "Drag nodes to rearrange. Scroll to zoom.",
+    linkTypes: {
+      caused_by: "Caused by",
+      causal: "Causal",
+      causes: "Causes",
+      enables: "Enables",
+      entity: "Entity",
+      prevents: "Prevents",
+      semantic: "Semantic",
+      temporal: "Temporal",
+    },
+    tooltip: {
+      causalLink: "Causal link",
+      entity: "Entity",
+      linkType: "Link type",
+      weight: "Weight",
+    },
+  },
+  tagFilter: {
+    all: "all",
+    any: "any",
+    clear: "Clear",
+    matchAllTitle: "Match all selected tags",
+    matchAnyTitle: "Match any selected tag",
+    placeholder: "Filter by tag...",
+    removeTag: "Remove {{tag}}",
+  },
+  recall: {
+    observations: {
+      label: "Observation",
+      proofCount: "{{count}} proof",
+      relevance: "Relevance {{score}}",
+    },
+    traceActions: {
+      showLess: "Show less",
+      viewAllResults: "View all {{count}} results",
+    },
+    traceDescriptions: {
+      finalResults: "Final output after retrieval and scoring.",
+      rrf: "Merge parallel retrieval lanes with reciprocal rank fusion.",
+    },
+    traceLabels: {
+      anyDate: "Any date",
+      combinedScoring: "Combined scoring",
+      merge: "Merge",
+      methodResultCount: "{{method}} · {{count}}",
+      methods: "{{count}} methods",
+      output: "Output",
+      rerank: "Rerank",
+      recencyShort: "Rec:",
+      rrfScore: "RRF {{score}}",
+      temporalShort: "Tmp:",
+    },
+    traceMethods: {
+      semantic: "Semantic",
+      temporal: "Temporal",
+      entity: "Entity",
+      text: "Text",
+      hybrid: "Hybrid",
+      keyword: "Keyword",
+      vector: "Vector",
+    },
+    traceTooltips: {
+      crossEncoder: "Cross-encoder score after reranking.",
+      temporal: "Temporal proximity boost based on query date.",
+      recency: "Recency boost based on newer memories.",
+    },
+  },
+  api: {
+    errors: {
+      auth: {
+        accessKeyNotConfigured: "Access key not configured",
+        invalidRequestBody: "Invalid request body",
+        invalidAccessKey: "Invalid access key",
+        unauthorized: "Unauthorized",
+      },
+      validation: {
+        bankIdRequired: "bank_id is required",
+        bankAndDirectiveIdRequired: "bank_id and directive_id are required",
+        bankAndMentalModelIdRequired: "bank_id and mental_model_id are required",
+        bankAndModelIdRequired: "bank_id and model_id are required",
+        operationIdRequired: "operation_id is required",
+        missingRequestData: "Missing request data",
+        missingBankId: "Missing bank_id",
+      },
+      generic: {
+        failed: "Failed",
+        unsupportedIndividualMemoryDelete:
+          "Individual memory unit deletion is not yet supported. Use clear all memories instead.",
+      },
+      banks: {
+        fetch: "Failed to fetch banks",
+        fetchFromApi: "Failed to fetch banks from API",
+        create: "Failed to create bank",
+        update: "Failed to update bank",
+        delete: "Failed to delete bank",
+        exportTemplate: "Failed to export bank template",
+        importTemplate: "Failed to import bank template",
+      },
+      bankConfig: {
+        fetch: "Failed to fetch bank config",
+        update: "Failed to update bank config",
+        reset: "Failed to reset bank config",
+      },
+      bankProfile: {
+        fetch: "Failed to fetch bank profile",
+        update: "Failed to update bank profile",
+      },
+      memories: {
+        list: "Failed to list memory units",
+        fetch: "Failed to fetch memory",
+        notFound: "Memory not found",
+        retain: "Failed to batch retain",
+        retainAsync: "Failed to batch retain async",
+        history: "Failed to fetch observation history",
+      },
+      documents: {
+        fetchList: "Failed to fetch documents",
+        fetch: "Failed to fetch document",
+        updateTags: "Failed to update document tags",
+        delete: "Failed to delete document",
+        chunks: "Failed to fetch document chunks",
+        reprocess: "Failed to reprocess document",
+      },
+      files: {
+        upload: "Failed to upload files",
+      },
+      chunks: {
+        fetch: "Failed to fetch chunk",
+      },
+      entities: {
+        list: "Failed to list entities",
+        fetch: "Failed to get entity",
+        graph: "Failed to fetch entity graph",
+        regenerateObservations: "Failed to regenerate entity observations",
+      },
+      graph: {
+        fetch: "Failed to fetch graph data",
+      },
+      mentalModels: {
+        list: "Failed to list mental models",
+        fetch: "Failed to get mental model",
+        create: "Failed to create mental model",
+        update: "Failed to update mental model",
+        delete: "Failed to delete mental model",
+        refresh: "Failed to refresh mental model",
+        history: "Failed to fetch mental model history",
+        notFound: "Mental model not found",
+      },
+      observations: {
+        list: "Failed to list observations",
+        clear: "Failed to clear observations",
+        fetch: "Failed to get observation",
+      },
+      directives: {
+        list: "Failed to list directives",
+        fetch: "Failed to get directive",
+        create: "Failed to create directive",
+        update: "Failed to update directive",
+        delete: "Failed to delete directive",
+      },
+      operations: {
+        fetch: "Failed to fetch operations",
+        cancel: "Failed to cancel operation",
+        status: "Failed to get operation status",
+        retry: "Failed to retry operation",
+      },
+      auditLogs: {
+        list: "Failed to list audit logs",
+        stats: "Failed to get audit log stats",
+      },
+      tags: {
+        list: "Failed to list tags",
+      },
+      consolidation: {
+        trigger: "Failed to trigger consolidation",
+        recover: "Failed to recover consolidation",
+      },
+      recall: {
+        failed: "Failed to recall",
+      },
+      reflect: {
+        failed: "Failed to reflect",
+      },
+      stats: {
+        fetch: "Failed to fetch stats",
+        memoriesTimeseries: "Failed to fetch memories timeseries",
+      },
+      version: {
+        fetch: "Failed to get version",
+      },
+      webhooks: {
+        list: "Failed to list webhooks",
+        create: "Failed to create webhook",
+        update: "Failed to update webhook",
+        delete: "Failed to delete webhook",
+        deliveries: "Failed to fetch webhook deliveries",
+      },
+    },
+  },
+  webhooks: {
+    allEvents: "All events",
+    count_one: "{{count}} webhook",
+    count_other: "{{count}} webhooks",
+    empty: "No webhooks configured.",
+    actions: {
+      add: "Add Webhook",
+      create: "Create Webhook",
+      delete: "Delete Webhook",
+      edit: "Edit Webhook",
+      refresh: "Refresh webhooks",
+      hideSecret: "Hide secret",
+      removePair: "Remove pair",
+      showSecret: "Show secret",
+      viewDeliveries: "View Deliveries",
+    },
+    columns: {
+      createdAt: "Created At",
+      eventTypes: "Event Types",
+      httpStatus: "HTTP Status",
+      method: "Method",
+      url: "URL",
+    },
+    deliveries: {
+      title: "Webhook Deliveries",
+      titleShort: "Deliveries",
+      attempts: "Attempts",
+      empty: "No deliveries yet.",
+      event: "Event",
+      responseBody: "Response Body",
+    },
+    deliveryStatuses: {
+      delivered: "Delivered",
+    },
+    dialogs: {
+      create: {
+        title: "Create Webhook",
+        description: "Send bank events to an external endpoint.",
+      },
+      delete: {
+        title: "Delete Webhook",
+        description: "This webhook will stop receiving events.",
+      },
+      edit: {
+        title: "Edit Webhook",
+        description: "Update endpoint, events, headers, and delivery settings.",
+      },
+    },
+    labels: {
+      clearExistingSecret: "Clear existing secret",
+      customHeaders: "Custom Headers",
+      queryParameters: "Query Parameters",
+      secret: "Secret",
+      timeout: "Timeout",
+      type: "Type",
+      url: "URL",
+    },
+    placeholders: {
+      keepExistingSecret: "Leave blank to keep existing secret",
+      key: "Key",
+      signingSecret: "Signing secret",
+      value: "Value",
+    },
+  },
+};
+
+type LocaleBranch = Record<string, unknown>;
+
+function mergeLocale<T extends LocaleBranch, U extends LocaleBranch>(base: T, extra: U): T & U {
+  const merged: LocaleBranch = { ...base };
+
+  for (const [key, value] of Object.entries(extra)) {
+    const baseValue = merged[key];
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      baseValue &&
+      typeof baseValue === "object" &&
+      !Array.isArray(baseValue)
+    ) {
+      merged[key] = mergeLocale(baseValue as LocaleBranch, value as LocaleBranch);
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  return merged as T & U;
+}
+
+const en = mergeLocale(baseEn, extraEn);
 
 export default en;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dataplaneBankUrl, getDataplaneHeaders } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,14 +10,26 @@ export async function POST(request: NextRequest) {
     // Extract bank_id from request JSON
     const requestJson = formData.get("request");
     if (!requestJson || typeof requestJson !== "string") {
-      return NextResponse.json({ error: "Missing request data" }, { status: 400 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "Missing request data",
+          errorKey: "api.errors.validation.missingRequestData",
+        }),
+        { status: 400 }
+      );
     }
 
     const requestData = JSON.parse(requestJson);
     const bankId = requestData.bank_id;
 
     if (!bankId) {
-      return NextResponse.json({ error: "Missing bank_id" }, { status: 400 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "Missing bank_id",
+          errorKey: "api.errors.validation.missingBankId",
+        }),
+        { status: 400 }
+      );
     }
 
     // Use the shared dataplane URL configuration
@@ -38,7 +51,10 @@ export async function POST(request: NextRequest) {
       } catch {
         errorData = { error: errorText };
       }
-      return NextResponse.json(errorData, { status: response.status });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, { ...errorData, errorKey: "api.errors.files.upload" }),
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
@@ -46,7 +62,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error uploading files:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to upload files" },
+      localizeApiErrorPayload(request, {
+        error: error instanceof Error ? error.message : "Failed to upload files",
+        errorKey: "api.errors.files.upload",
+      }),
       { status: 500 }
     );
   }

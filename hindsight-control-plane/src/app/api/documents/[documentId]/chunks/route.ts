@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DATAPLANE_URL, getDataplaneHeaders } from "@/lib/hindsight-client";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 export async function GET(
   request: NextRequest,
@@ -11,7 +12,13 @@ export async function GET(
     const bankId = searchParams.get("bank_id");
 
     if (!bankId) {
-      return NextResponse.json({ error: "bank_id is required" }, { status: 400 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "bank_id is required",
+          errorKey: "api.errors.validation.bankIdRequired",
+        }),
+        { status: 400 }
+      );
     }
 
     const limit = searchParams.get("limit") || "100";
@@ -26,13 +33,22 @@ export async function GET(
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: response.statusText }));
-      return NextResponse.json(error, { status: response.status });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, { ...error, errorKey: "api.errors.documents.chunks" }),
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Error fetching document chunks:", error);
-    return NextResponse.json({ error: "Failed to fetch document chunks" }, { status: 500 });
+    return NextResponse.json(
+      localizeApiErrorPayload(request, {
+        error: "Failed to fetch document chunks",
+        errorKey: "api.errors.documents.chunks",
+      }),
+      { status: 500 }
+    );
   }
 }

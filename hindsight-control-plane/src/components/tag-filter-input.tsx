@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Tag, X } from "lucide-react";
 import { client } from "@/lib/api";
@@ -26,12 +27,13 @@ export function TagFilterInput({
   onChange,
   bankId,
   fetchSuggestions,
-  placeholder = "Filter by tag…",
+  placeholder,
   className,
   matchMode,
   onMatchModeChange,
   showMatchToggleAt = DEFAULT_SHOW_MATCH_TOGGLE_AT,
 }: TagFilterInputProps) {
+  const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -150,7 +152,7 @@ export function TagFilterInput({
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("tagFilter.placeholder")}
           className="pl-8 h-9"
         />
         {open && suggestions.length > 0 && (
@@ -191,7 +193,7 @@ export function TagFilterInput({
                 type="button"
                 onClick={() => removeTag(tag)}
                 className="opacity-50 hover:opacity-100 transition-opacity ml-0.5"
-                aria-label={`Remove tag ${tag}`}
+                aria-label={t("tagFilter.removeTag", { tag })}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -202,7 +204,7 @@ export function TagFilterInput({
             onClick={() => onChange([])}
             className="text-xs text-muted-foreground hover:text-foreground underline"
           >
-            Clear
+            {t("common.actions.clear")}
           </button>
         </div>
       )}
@@ -217,9 +219,9 @@ export function TagFilterInput({
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground"
             }`}
-            title="Match any selected tag"
+            title={t("tagFilter.matchAnyTitle")}
           >
-            any
+            {t("tagFilter.any")}
           </button>
           <button
             type="button"
@@ -229,9 +231,9 @@ export function TagFilterInput({
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground"
             }`}
-            title="Match all selected tags"
+            title={t("tagFilter.matchAllTitle")}
           >
-            all
+            {t("tagFilter.all")}
           </button>
         </div>
       )}

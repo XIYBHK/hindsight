@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { localizeApiErrorPayload } from "@/lib/i18n/api-errors";
 
 const ACCESS_KEY_COOKIE = "hindsight_cp_access";
 
@@ -39,7 +40,13 @@ export function middleware(request: NextRequest) {
   if (!isAuthenticated) {
     // For API routes, return 401 JSON instead of redirecting to HTML login page
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        localizeApiErrorPayload(request, {
+          error: "Unauthorized",
+          errorKey: "api.errors.auth.unauthorized",
+        }),
+        { status: 401 }
+      );
     }
 
     // Redirect to login page
